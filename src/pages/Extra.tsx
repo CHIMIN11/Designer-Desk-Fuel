@@ -59,3 +59,15 @@ export function Partners() {
     </div>
   )
 }
+
+export function ComingSoon({ title, en, text, to, cta }: { title: string; en: string; text: string; to: string; cta: string }) {
+  return (
+    <div className="container page">
+      <p className="eyebrow">✦ {en.toUpperCase()}</p>
+      <h1>{title}</h1>
+      <p className="lead">{text}</p>
+      <span className="badge badge-muted" style={{ marginRight: 12 }}>即將推出</span>
+      <Link to={to} className="btn btn-magic">{cta}</Link>
+    </div>
+  )
+}

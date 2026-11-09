@@ -27,9 +27,10 @@ export default function Layout() {
           <nav className="main-nav" aria-label="主選單">
             <NavLink to="/about">關於 DDF</NavLink>
             <NavLink to="/spaces" end>探索空間</NavLink>
-            <NavLink to="/venues">活動場地</NavLink>
-            <NavLink to="/reviews">設計師評價</NavLink>
-            <NavLink to="/community">社群活動</NavLink>
+            <NavLink to="/venues">活動與講座</NavLink>
+            <NavLink to="/community">設計師社群</NavLink>
+            <NavLink to="/map">魔法師地圖</NavLink>
+            <NavLink to="/resources">創作資源</NavLink>
             <NavLink to="/partners">品牌合作</NavLink>
             {session && <NavLink to="/my-spaces">我的刊登</NavLink>}
             {isAdmin && <NavLink to="/admin">管理後台</NavLink>}
@@ -37,11 +38,11 @@ export default function Layout() {
           <div className="header-actions">
             <Link to="/spaces" className="icon-btn" aria-label="搜尋空間"><Icon name="search" size={22} stroke={1.8} /></Link>
             {session ? (
-              <button type="button" className="btn btn-outline-light" onClick={signOut}>登出</button>
+              <button type="button" className="btn btn-pill-outline" onClick={signOut}>登出</button>
             ) : (
               <>
-                <Link to="/login" className="btn btn-outline-light">登入</Link>
-                <Link to="/login?mode=signup" className="btn btn-pink">註冊</Link>
+                <Link to="/login" className="btn btn-pill-outline">登入</Link>
+                <Link to="/login?mode=signup" className="btn btn-magic">註冊成為魔法師+</Link>
               </>
             )}
           </div>

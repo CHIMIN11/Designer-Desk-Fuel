@@ -10,7 +10,7 @@ import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/admin/Admin'
 import { AssetGuidelines, LegalPlaceholder, ListingTerms } from './pages/Legal'
 import NotFound from './pages/NotFound'
-import { Community, Partners, Reviews } from './pages/Extra'
+import { Community, ComingSoon, Partners, Reviews } from './pages/Extra'
 
 export default function App() {
   return (
@@ -23,6 +23,9 @@ export default function App() {
         <Route path="reviews" element={<Reviews />} />
         <Route path="community" element={<Community />} />
         <Route path="partners" element={<Partners />} />
+        <Route path="map" element={<ComingSoon title="魔法師地圖" en="Designer Map" text="在地圖上找到附近已授權刊登的工作空間與設計活動。地圖功能開發中，目前可先用「探索空間」依地區搜尋。" to="/spaces" cta="探索空間" />} />
+        <Route path="resources" element={<ComingSoon title="創作資源" en="Creative Resources" text="設計工具、素材與學習資源整理，籌備中。" to="/" cta="回首頁" />} />
+        <Route path="lounge" element={<ComingSoon title="DDF 即時聊天室" en="DDF Lounge" text="與在地設計師即時交流的會員聊天室，開發中。上線時將採會員登入、私訊僅參與者可讀、可檢舉與封鎖的安全設計。" to="/community" cta="看設計師社群" />} />
         <Route path="list-your-space" element={<ListYourSpace />} />
         <Route path="my-spaces" element={<MySpaces />} />
         <Route path="login" element={<Login />} />
