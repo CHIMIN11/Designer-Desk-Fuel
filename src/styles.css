@@ -662,33 +662,26 @@ html, body { overflow-x: hidden; }
 @media (max-width: 760px) { .brand-name { display: inline; font-size: 16px; } .brand { gap: 8px; } }
 @media (max-width: 520px) { .brand-name { display: inline !important; } }
 
-/* Orbit that wraps the whole headline (設計師的工作 ✦ 創意據點) */
-.title-orbit { position: relative; display: inline-block; max-width: none !important; padding: 4px 64px 22px 0; isolation: isolate; }
-.title-orbit .mg-title { position: relative; z-index: 1; flex-wrap: nowrap; white-space: nowrap; }
+/* Orbit that wraps the headline only (subtitle sits below, never under the line) */
+.title-orbit { position: relative; display: inline-block; max-width: 100%; padding: 6px 56px 26px 0; isolation: isolate; }
+.mg-hero-copy > .title-orbit { max-width: 100%; }
+.title-orbit .mg-title { position: relative; z-index: 1; margin: 0; padding: 0; }
 .title-orbit .mg-title .gold-text { filter: drop-shadow(0 0 14px rgba(231,194,122,0.35)); }
-.title-orbit .mg-sub { position: relative; z-index: 1; }
-.title-orbit .orbit { position: absolute; left: -36px; right: 0; top: -6px; bottom: -6px; width: calc(100% + 36px); height: calc(100% + 12px); overflow: visible; pointer-events: none; z-index: 0; }
+.title-orbit .orbit { position: absolute; left: -28px; top: -4px; width: calc(100% + 28px); height: calc(100% + 8px); overflow: visible; pointer-events: none; z-index: 0; }
 .title-orbit .orbit path { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .title-orbit .orbit-back { stroke: rgba(231,194,122,0.35); stroke-width: 1.2; }
 .title-orbit .orbit-front { stroke: url(#orbitGold); stroke-width: 3.2; }
 .title-orbit .orbit-shine { stroke: #fff; stroke-width: 2; stroke-dasharray: 60 1400; opacity: 0.9; animation: orbit-shine 5s ease-in-out infinite; }
 .orbit-star { position: absolute; z-index: 2; line-height: 0; pointer-events: none; }
-.orbit-star-1 { right: 18px; top: 2px; filter: drop-shadow(0 0 8px rgba(255,240,200,0.95)); animation: ring-twinkle 2.8s ease-in-out infinite; }
-.orbit-star-2 { left: -30px; bottom: 6px; animation: ring-twinkle 3.6s ease-in-out infinite 0.8s; }
+.orbit-star-1 { right: 14px; top: 0; filter: drop-shadow(0 0 8px rgba(255,240,200,0.95)); animation: ring-twinkle 2.8s ease-in-out infinite; }
+.orbit-star-2 { left: -24px; bottom: 2px; animation: ring-twinkle 3.6s ease-in-out infinite 0.8s; }
 @keyframes orbit-shine { 0% { stroke-dashoffset: 1460; } 65%, 100% { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .title-orbit .orbit-shine { display: none; } .orbit-star { animation: none !important; } }
-.mg-hero-copy > .title-orbit { max-width: none; }
-@media (max-width: 1150px) { .title-orbit { padding-right: 48px; } }
+.title-orbit + .mg-sub { margin-top: 14px; }
 @media (max-width: 760px) {
-  .title-orbit { display: block; padding: 2px 30px 18px 0; }
-  .title-orbit .mg-title { flex-wrap: wrap; white-space: normal; font-size: 32px; }
-  .title-orbit .orbit { left: -14px; width: calc(100% + 14px); }
-  .orbit-star-1 { right: 4px; top: 0; }
-  .orbit-star-2 { left: -10px; }
-}
-@media (max-width: 760px) {
-  .title-orbit { padding-bottom: 0; }
-  .title-orbit .orbit { top: -8px; bottom: auto; height: 118px; }
-  .title-orbit .mg-sub { margin-top: 26px; }
-  .orbit-star-2 { bottom: auto; top: 98px; }
+  .title-orbit { display: block; padding: 4px 34px 22px 0; }
+  .title-orbit .mg-title { font-size: 32px; }
+  .title-orbit .orbit { left: -12px; width: calc(100% + 12px); }
+  .orbit-star-1 { right: 4px; }
+  .orbit-star-2 { left: -8px; }
 }

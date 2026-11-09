@@ -92,7 +92,6 @@ export default function Home() {
               <Sparkle size={18} color="#e7c27a" />
               <span className="gold-text">創意據點</span>
             </h1>
-            <p className="mg-sub">找到適合工作的空間 <i>×</i> 認識同頻的設計師 <i>×</i> 激發創作靈感</p>
             <svg className="orbit" viewBox="0 0 800 240" preserveAspectRatio="none" aria-hidden="true">
               <defs>
                 <linearGradient id="orbitGold" x1="0" y1="1" x2="1" y2="0">
@@ -114,6 +113,7 @@ export default function Home() {
             <span className="orbit-star orbit-star-1"><Sparkle size={22} color="#fff0c8" /></span>
             <span className="orbit-star orbit-star-2"><Sparkle size={12} color="#e7c27a" /></span>
           </div>
+          <p className="mg-sub">找到適合工作的空間 <i>×</i> 認識同頻的設計師 <i>×</i> 激發創作靈感</p>
           <ul className="mg-icons hscroll">
             {HERO_ICONS.map(([icon, a, b]) => (
               <li key={a}><Icon name={icon} size={38} stroke={1.2} /><b>{a}</b><span>{b}</span></li>
