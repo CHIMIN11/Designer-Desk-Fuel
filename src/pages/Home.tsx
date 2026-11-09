@@ -89,7 +89,28 @@ export default function Home() {
           <h1 className="mg-title">
             <span>設計師的工作空間</span>
             <Sparkle size={20} color="#e7c27a" />
-            <span className="gold-text">創意據點</span>
+            <span className="magic-ring">
+              <span className="gold-text">創意據點</span>
+              <svg className="ring" viewBox="0 0 400 140" aria-hidden="true" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="ringGold" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#b98a3e" stopOpacity="0" />
+                    <stop offset="0.25" stopColor="#e7c27a" />
+                    <stop offset="0.6" stopColor="#fff0c8" />
+                    <stop offset="1" stopColor="#e7c27a" stopOpacity="0.2" />
+                  </linearGradient>
+                  <filter id="ringGlow" x="-20%" y="-50%" width="140%" height="200%">
+                    <feGaussianBlur stdDeviation="2.4" result="b" />
+                    <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
+                {/* back half of the orbit (behind the text) and front sweep */}
+                <path className="ring-back" d="M60 30 C150 2 330 4 384 40" />
+                <path className="ring-front" d="M384 40 C412 78 330 122 200 128 C90 133 8 112 14 84 C18 66 40 54 66 48" filter="url(#ringGlow)" />
+                <path className="ring-shine" d="M384 40 C412 78 330 122 200 128 C90 133 8 112 14 84 C18 66 40 54 66 48" />
+              </svg>
+              <Sparkle size={22} color="#fff0c8" />
+            </span>
           </h1>
           <p className="mg-sub">找到適合工作的空間 <i>×</i> 認識同頻的設計師 <i>×</i> 激發創作靈感</p>
           <ul className="mg-icons hscroll">

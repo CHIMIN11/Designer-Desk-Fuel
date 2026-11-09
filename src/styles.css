@@ -641,3 +641,18 @@ html, body { overflow-x: hidden; }
   .about-logo { max-width: 200px; }
   .about-body p { font-size: 16px; }
 }
+
+/* Magic ring around 創意據點 */
+.magic-ring { position: relative; display: inline-block; padding: 0 0.15em; isolation: isolate; }
+.magic-ring .gold-text { position: relative; z-index: 1; filter: drop-shadow(0 0 14px rgba(231,194,122,0.35)); }
+.magic-ring .ring { position: absolute; left: -16%; right: -18%; top: -32%; bottom: -40%; width: 134%; height: 172%; overflow: visible; pointer-events: none; }
+.magic-ring .ring path { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.magic-ring .ring-back { stroke: rgba(231,194,122,0.45); stroke-width: 1.5; z-index: 0; }
+.magic-ring .ring-front { stroke: url(#ringGold); stroke-width: 3; }
+.magic-ring .ring-shine { stroke: #fff; stroke-width: 2; stroke-dasharray: 40 900; opacity: 0.9; animation: ring-shine 4.5s ease-in-out infinite; }
+.magic-ring > svg:last-child { position: absolute; right: -0.95em; top: 0.05em; filter: drop-shadow(0 0 8px rgba(255,240,200,0.9)); animation: ring-twinkle 2.8s ease-in-out infinite; }
+@keyframes ring-shine { 0% { stroke-dashoffset: 940; } 60%, 100% { stroke-dashoffset: 0; } }
+@keyframes ring-twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.75); } }
+@media (prefers-reduced-motion: reduce) { .magic-ring .ring-shine, .magic-ring > svg:last-child { animation: none; } .magic-ring .ring-shine { display: none; } }
+.mg-title { padding-bottom: 0.25em; }
+@media (max-width: 760px) { .magic-ring > svg:last-child { width: 16px; height: 16px; } .mg-title { margin-bottom: 6px; } }
