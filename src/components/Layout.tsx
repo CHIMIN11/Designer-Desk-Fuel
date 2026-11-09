@@ -1,11 +1,17 @@
 import { asset } from '../lib/asset'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import Icon from './Icon'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 export default function Layout() {
   const { session, isAdmin, signOut } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const { pathname, search } = useLocation()
+
+  // Close the mobile menu after navigating.
+  useEffect(() => { setMenuOpen(false) }, [pathname, search])
 
   return (
     <>
@@ -24,7 +30,10 @@ export default function Layout() {
             <span className="ddf-word">DDF<span>.</span></span>
             <span className="brand-name">Designer Desk Fuel</span>
           </Link>
-          <nav className="main-nav" aria-label="主選單">
+          <button type="button" className="menu-btn" aria-label={menuOpen ? '關閉選單' : '開啟選單'} aria-expanded={menuOpen} aria-controls="main-nav" onClick={() => setMenuOpen(!menuOpen)}>
+            <Icon name={menuOpen ? 'close' : 'menu'} size={24} stroke={1.8} />
+          </button>
+          <nav id="main-nav" className={`main-nav${menuOpen ? ' open' : ''}`} aria-label="主選單">
             <NavLink to="/about">關於 DDF</NavLink>
             <NavLink to="/spaces" end>探索空間</NavLink>
             <NavLink to="/venues">活動與講座</NavLink>
@@ -34,6 +43,16 @@ export default function Layout() {
             <NavLink to="/partners">品牌合作</NavLink>
             {session && <NavLink to="/my-spaces">我的刊登</NavLink>}
             {isAdmin && <NavLink to="/admin">管理後台</NavLink>}
+            <div className="drawer-auth">
+              {session ? (
+                <button type="button" className="btn btn-pill-outline" onClick={signOut}>登出</button>
+              ) : (
+                <>
+                  <Link to="/login" className="btn btn-pill-outline">登入</Link>
+                  <Link to="/login?mode=signup" className="btn btn-magic">註冊成為魔法師+</Link>
+                </>
+              )}
+            </div>
           </nav>
           <div className="header-actions">
             <Link to="/spaces" className="icon-btn" aria-label="搜尋空間"><Icon name="search" size={22} stroke={1.8} /></Link>
@@ -52,6 +71,14 @@ export default function Layout() {
       <main>
         <Outlet />
       </main>
+
+      <nav className="tabbar" aria-label="快速導覽">
+        <NavLink to="/" end><Icon name="home" size={22} /><span>首頁</span></NavLink>
+        <NavLink to="/spaces" end><Icon name="search" size={22} /><span>探索</span></NavLink>
+        <NavLink to="/venues"><Icon name="calendar" size={22} /><span>活動</span></NavLink>
+        <NavLink to="/reviews"><Icon name="chat" size={22} /><span>評價</span></NavLink>
+        <NavLink to={session ? '/my-spaces' : '/login'}><Icon name="user" size={22} /><span>{session ? '我的' : '登入'}</span></NavLink>
+      </nav>
 
       <footer className="site-footer">
         <div className="container row">

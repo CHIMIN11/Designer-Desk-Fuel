@@ -506,3 +506,138 @@ html, body { overflow-x: hidden; }
 .mg-picks { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .about-body h2 .underline { background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .about-motto { color: var(--gold); }
+
+/* ===== Mobile redesign ===== */
+.menu-btn, .tabbar, .drawer-auth { display: none; }
+
+/* Tablet (e.g. the Claude app preview width) */
+@media (max-width: 1150px) {
+  .mg-features ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mg-go { flex: 1 1 100%; justify-content: center; }
+  .mg-panels { gap: 16px; }
+  .mg-chat { flex-basis: 100%; }
+}
+
+/* Phone */
+@media (max-width: 760px) {
+  body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+
+  /* header: logo + search + menu; nav becomes a drawer */
+  .site-header { position: sticky; top: 0; z-index: 50; }
+  .site-header .bar { flex-wrap: nowrap; padding: 8px 12px 8px 16px; gap: 6px; }
+  .brand { border-right: 0; padding-right: 0; margin-right: auto; }
+  .brand img { height: 34px; }
+  .ddf-word { font-size: 26px; }
+  .header-actions > .btn { display: none; }
+  .menu-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; background: transparent; color: #fff; cursor: pointer; }
+  .main-nav { display: none; }
+  .main-nav.open { display: flex; position: absolute; left: 0; right: 0; top: 100%; margin: 0; padding: 8px 16px 20px; flex-direction: column; flex-wrap: nowrap; gap: 0; overflow: visible; border-top: 1px solid #241d2e; background: rgba(7,5,11,0.98); box-shadow: 0 20px 40px rgba(0,0,0,0.6); height: calc(100vh - 60px); overflow-y: auto; }
+  .main-nav.open a { padding: 14px 6px; font-size: 17px; border-bottom: 1px solid #1c1823; }
+  .main-nav.open .drawer-auth { display: flex; gap: 10px; padding-top: 16px; }
+  .main-nav.open .drawer-auth .btn { flex: 1; }
+  .config-banner { font-size: 12px; padding: 6px 12px; }
+
+  /* bottom tab bar */
+  .tabbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: rgba(10,7,15,0.97); border-top: 1px solid #2e2836; padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); backdrop-filter: blur(10px); }
+  .tabbar a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; justify-content: center; color: #a9a4b5; text-decoration: none; font-size: 11px; }
+  .tabbar a.active { color: var(--gold); }
+
+  /* hero */
+  .mg-hero { min-height: 0; }
+  .mg-hero-copy { margin-top: -28px; padding: 0 16px 92px; }
+  .mg-eyebrow { font-size: 11px; letter-spacing: 0.28em; }
+  .mg-title { font-size: 34px; gap: 0 8px; margin-top: 10px; }
+  .mg-title svg { width: 16px; height: 16px; }
+  .mg-sub { font-size: 14px; letter-spacing: 0.04em; line-height: 1.8; }
+  .mg-sub i { margin: 0 4px; }
+  .hscroll { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; margin-left: -16px !important; margin-right: -16px !important; padding: 0 16px !important; }
+  .hscroll::-webkit-scrollbar { display: none; }
+  .mg-icons { margin-top: 22px; gap: 10px; }
+  .mg-icons li { flex: 0 0 auto; width: auto; min-width: 92px; padding: 12px 10px; border-radius: 14px; border: 1px solid #3b2a4d; background: rgba(18,13,25,0.8); }
+  .mg-icons svg { width: 28px; height: 28px; }
+  .mg-icons b { font-size: 13px; }
+  .mg-icons span { font-size: 11px; }
+
+  /* search */
+  .mg-search { margin-top: -70px; padding: 0 12px; }
+  .mg-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 0; background: #140d1c; border: 1px solid #4a3a5a; border-bottom: 0; border-radius: 16px 16px 0 0; overflow: hidden; }
+  .mg-tabs button { flex: none; border: 0; border-radius: 0; min-height: 50px; padding: 0 8px; font-size: 15px; justify-content: center; gap: 6px; }
+  .mg-tabs button small { display: none; }
+  .mg-card { border-radius: 0 0 16px 16px; padding: 14px; gap: 10px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .mg-card > * { min-width: 0; }
+  .mg-sel { min-height: 54px; padding: 4px 10px; gap: 6px; }
+  .mg-sel select { font-size: 15px; }
+  .mg-sel-2 small { font-size: 11px; }
+  .mg-conds { grid-column: 1 / -1; border: 0; padding: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -14px; padding: 0 14px 2px; }
+  .mg-conds::-webkit-scrollbar { display: none; }
+  .mg-conds { min-width: 0; min-inline-size: 0; }
+  .mg-conds legend { float: none; display: block; width: auto; margin-bottom: 8px; }
+  .mg-conds button { flex: 0 0 auto; min-height: 40px; padding: 0 12px; font-size: 14px; white-space: nowrap; }
+  .mg-go { grid-column: 1 / -1; min-height: 52px; font-size: 17px; }
+
+  /* feature tiles: 2-column grid, chat spans full width */
+  .mg-features { padding: 20px 12px; }
+  .mg-features ul { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mg-features a { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; border: 1px solid #2e2438; background: #0f0b15; height: 100%; }
+  .mg-features .ic { width: 44px; height: 44px; }
+  .mg-features .ic svg { width: 22px; height: 22px; }
+  .mg-features b { font-size: 15px; }
+  .mg-features small { font-size: 12px; line-height: 1.5; }
+  .mg-features a.hl { padding: 14px; }
+
+  /* panels */
+  .mg-panels { padding: 6px 12px 24px; gap: 14px; }
+  .mg-panel { flex-basis: 100%; padding: 20px 18px; border-radius: 18px; }
+  .mg-vision h2 { font-size: 22px; }
+  .mg-map-head h2 { font-size: 22px; }
+  .mg-map-head h2 small { font-size: 13px; }
+  .mg-map-head > svg { width: 36px; height: 36px; }
+  .mg-legend { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 10px 12px; }
+  .mg-map-cta { width: 100%; justify-content: center; }
+  .mg-chat { padding: 0; }
+  .mg-chat-body { flex-direction: column; flex-wrap: nowrap; }
+  .mg-chat-body nav { flex: none; flex-direction: row; overflow-x: auto; scrollbar-width: none; border-right: 0; border-bottom: 1px solid #eeeaf2; padding: 8px; gap: 6px; }
+  .mg-chat-body nav::-webkit-scrollbar { display: none; }
+  .mg-chat-body nav .h { display: none; }
+  .mg-chat-body nav a { flex: 0 0 auto; white-space: nowrap; border: 1px solid #e3e0e8; border-radius: 999px; padding: 6px 12px; font-size: 13px; }
+  .mg-chat-body .msgs { flex: none; }
+
+  /* swipe rows */
+  .mg-section { padding: 4px 0 24px; }
+  .mg-sec-head, .mg-section .demo-note, .mg-section .notice { margin-left: 16px; margin-right: 16px; }
+  .mg-sec-head h2 { font-size: 21px; }
+  .mg-sec-head h2 small { font-size: 15px; }
+  .mg-sec-head a { font-size: 14px; }
+  .hscroll-m { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 12px !important; padding: 0 16px 6px; }
+  .hscroll-m::-webkit-scrollbar { display: none; }
+  .hscroll-m > * { scroll-snap-align: start; }
+  .mg-picks > * { flex: 0 0 78%; }
+  .mg-reviews > * { flex: 0 0 86%; }
+  .mg-reviews img { width: 92px; }
+  .mg-review-list { margin: 0 16px; }
+
+  /* partners */
+  .mg-partners { padding: 22px 0; gap: 14px; }
+  .mg-partners .t { padding: 0 16px; border-right: 0; }
+  .mg-partners .logos { flex: 1 1 100%; }
+  .mg-partners .logos > * { flex: 0 0 auto; white-space: nowrap; }
+  .mg-partners .motto { padding: 0 16px; font-size: 17px; }
+  .mg-partners > .btn { margin: 0 16px; flex: 1 1 100%; justify-content: center; }
+
+  /* footer */
+  .site-footer .row { flex-direction: column; align-items: flex-start; }
+  .site-footer nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; font-size: 14px; }
+  .site-footer img { height: 64px !important; }
+
+  /* inner pages */
+  .page { padding: 28px 0 48px; }
+  .container { padding: 0 16px; }
+  .filters { gap: 10px; }
+  .filters .field { flex: 1 1 140px; }
+  .filters .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; }
+  .filters .chips .chip { flex: 0 0 auto; white-space: nowrap; }
+  .about-hero { padding: 40px 0 32px; }
+  .about-body { gap: 28px; padding-top: 32px; padding-bottom: 56px; }
+  .about-logo { max-width: 200px; }
+  .about-body p { font-size: 16px; }
+}

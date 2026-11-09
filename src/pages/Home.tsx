@@ -92,7 +92,7 @@ export default function Home() {
             <span className="gold-text">創意據點</span>
           </h1>
           <p className="mg-sub">找到適合工作的空間 <i>×</i> 認識同頻的設計師 <i>×</i> 激發創作靈感</p>
-          <ul className="mg-icons">
+          <ul className="mg-icons hscroll">
             {HERO_ICONS.map(([icon, a, b]) => (
               <li key={a}><Icon name={icon} size={38} stroke={1.2} /><b>{a}</b><span>{b}</span></li>
             ))}
@@ -240,7 +240,7 @@ export default function Home() {
           <Link to="/spaces">查看更多空間 →</Link>
         </div>
         {demoSpaces && <p className="demo-note">DEMO 示意：以下店家、照片與評分皆為版面示意，並非真實店家，正式上線前移除。</p>}
-        <div className="mg-picks">
+        <div className="mg-picks hscroll-m">
           {spaces.map((s) => (
             <Link key={s.id} to={`/spaces?city=${encodeURIComponent(s.city)}`} className="mg-pick">
               <div className="img empty"><Icon name="cup" size={40} color="#6b5a7c" /></div>
@@ -280,7 +280,7 @@ export default function Home() {
         {demoReviews && <p className="demo-note">DEMO 示意：以下評價與人物為版面示意，並非真實會員評價，正式上線前移除。</p>}
         {reviews.length > 0 && <ul className="review-list mg-review-list">{reviews.map((r) => <ReviewItem key={r.id} r={r} showSpace />)}</ul>}
         {demoReviews && (
-          <div className="mg-reviews">
+          <div className="mg-reviews hscroll-m">
             {DEMO_REVIEWS.map((r) => (
               <article key={r.name}>
                 <img src={r.img} alt="" />
@@ -299,7 +299,7 @@ export default function Home() {
       {/* PARTNERS */}
       <section className="mg-partners" aria-label="合作贊助夥伴">
         <div className="t"><b>合作贊助夥伴</b><small>OUR PARTNERS</small></div>
-        <div className="logos">
+        <div className="logos hscroll-m">
           {PARTNERS.map((p) => (
             <a key={p.handle} href={p.url} target="_blank" rel="noopener noreferrer"><Icon name="instagram" size={20} /> @{p.handle}</a>
           ))}
