@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 import { Link } from 'react-router-dom'
 
 export default function About() {
@@ -12,7 +13,7 @@ export default function About() {
       </section>
 
       <section className="container about-body">
-        <img src="/logo-full.png" alt="DDF Designer Desk Fuel" className="about-logo" />
+        <img src={asset('/logo-full.png')} alt="DDF Designer Desk Fuel" className="about-logo" />
         <div>
           <h2 className="serif">
             設計師的工作<span className="dot">・</span><span className="underline">創意據點</span>

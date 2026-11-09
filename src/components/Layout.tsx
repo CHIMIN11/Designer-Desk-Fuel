@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import Icon from './Icon'
@@ -8,6 +9,9 @@ export default function Layout() {
 
   return (
     <>
+      {import.meta.env.VITE_PREVIEW === 'true' && (
+        <div className="config-banner" role="status">設計預覽版：此預覽無法連線資料庫，登入、目錄與申請功能請在正式部署後使用。</div>
+      )}
       {!isSupabaseConfigured && (
         <div className="config-banner" role="status">
           開發模式：尚未連接 Supabase，目錄、申請與後台功能暫時無法使用（不會顯示任何假資料）。
@@ -16,7 +20,7 @@ export default function Layout() {
       <header className="site-header">
         <div className="bar">
           <Link to="/" className="brand" aria-label="DDF Designer Desk Fuel 首頁">
-            <img src="/logo-mark.png" alt="" />
+            <img src={asset('/logo-mark.png')} alt="" />
             <span className="ddf-word">DDF<span>.</span></span>
             <span className="brand-name">Designer Desk Fuel</span>
           </Link>
@@ -51,7 +55,7 @@ export default function Layout() {
       <footer className="site-footer">
         <div className="container row">
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <img src="/logo-full.png" alt="DDF Designer Desk Fuel" style={{ height: 80, width: 'auto' }} />
+            <img src={asset('/logo-full.png')} alt="DDF Designer Desk Fuel" style={{ height: 80, width: 'auto' }} />
             <span style={{ fontSize: 13, color: 'var(--muted-2)' }}>Find Your Space.<br />Fuel Your Magic.</span>
           </div>
           <nav aria-label="法律與政策">

@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
@@ -23,10 +24,10 @@ const CONDITIONS = [
 ] as const
 
 const USE_CASES = [
-  { title: '一人工作', sub: '專注不被打擾', img: '/usecase-solo.jpg', query: 'power=1&wifi=1' },
-  { title: '繪圖／修圖', sub: '適合創作設備', img: '/usecase-drawing.jpg', query: 'tables=1&power=1' },
-  { title: '辦活動／講座', sub: '場地與設備', img: '/usecase-events.jpg', query: 'events=1' },
-  { title: '設計師聚會', sub: '交流 ＋ 人脈', img: '/usecase-meetup.jpg', query: 'group=1' },
+  { title: '一人工作', sub: '專注不被打擾', img: asset('/usecase-solo.jpg'), query: 'power=1&wifi=1' },
+  { title: '繪圖／修圖', sub: '適合創作設備', img: asset('/usecase-drawing.jpg'), query: 'tables=1&power=1' },
+  { title: '辦活動／講座', sub: '場地與設備', img: asset('/usecase-events.jpg'), query: 'events=1' },
+  { title: '設計師聚會', sub: '交流 ＋ 人脈', img: asset('/usecase-meetup.jpg'), query: 'group=1' },
 ]
 
 const IDEALS = [
@@ -88,7 +89,7 @@ export default function Home() {
       {/* HERO */}
       <section className="hero2">
         <div className="hero2-media">
-          <img src="/hero-2.jpg" alt="設計師帶著筆電在咖啡店構思作品" />
+          <img src={asset('/hero-2.jpg')} alt="設計師帶著筆電在咖啡店構思作品" />
           <div className="fade" aria-hidden="true" />
         </div>
         <div className="hero2-copy">
@@ -177,7 +178,7 @@ export default function Home() {
       {/* FOUNDER */}
       <section className="founder" aria-labelledby="founder-title">
         <div className="founder-photo">
-          <img src="/founder.jpg" alt="DDF 發起人" />
+          <img src={asset('/founder.jpg')} alt="DDF 發起人" />
           <p className="founder-sign"><small>發起人 / Founder</small><span>Chimin_design</span></p>
         </div>
         <div className="founder-copy">
