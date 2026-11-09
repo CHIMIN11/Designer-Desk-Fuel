@@ -656,3 +656,8 @@ html, body { overflow-x: hidden; }
 @media (prefers-reduced-motion: reduce) { .magic-ring .ring-shine, .magic-ring > svg:last-child { animation: none; } .magic-ring .ring-shine { display: none; } }
 .mg-title { padding-bottom: 0.25em; }
 @media (max-width: 760px) { .magic-ring > svg:last-child { width: 16px; height: 16px; } .mg-title { margin-bottom: 6px; } }
+
+/* Header brand without the DDF. wordmark */
+.brand-name { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 18px; letter-spacing: 0.02em; }
+@media (max-width: 760px) { .brand-name { display: inline; font-size: 16px; } .brand { gap: 8px; } }
+@media (max-width: 520px) { .brand-name { display: inline !important; } }

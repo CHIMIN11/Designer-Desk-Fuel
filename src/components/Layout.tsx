@@ -27,7 +27,6 @@ export default function Layout() {
         <div className="bar">
           <Link to="/" className="brand" aria-label="DDF Designer Desk Fuel 首頁">
             <img src={asset('/logo-mark.png')} alt="" />
-            <span className="ddf-word">DDF<span>.</span></span>
             <span className="brand-name">Designer Desk Fuel</span>
           </Link>
           <button type="button" className="menu-btn" aria-label={menuOpen ? '關閉選單' : '開啟選單'} aria-expanded={menuOpen} aria-controls="main-nav" onClick={() => setMenuOpen(!menuOpen)}>
