@@ -19,8 +19,9 @@ DDF 是一個 **Workspace Directory**：只刊登經店家授權、並經管理�
 - 管理員審核、核對、上架／暫停／撤下、素材授權、更新審核、評價隱藏；全部寫入不可修改的稽核紀錄
 - 設計師真實評價：僅限登入會員、僅限已公開空間、每人每空間一則、無星級與排名、管理員可隱藏
 - 活動場地與聚會：可辦活動／講座、容納人數、可接待聚會、大桌面
+- 工作條件：不限時、低消金額（逾期待確認時暫停顯示）、洗手間
 
-**資料庫安全測試：34 項全部通過**（`npm test`）。涵蓋規格書的 8 項測試案例，以及評價、DEMO 資料、刪除帳號等情境。
+**資料庫安全測試：35 項全部通過**（`npm test`）。涵蓋規格書的 8 項測試案例，以及評價、DEMO 資料、刪除帳號等情境。
 
 ### ✅ 已完成（前端，尚未在連線 Supabase 的環境實測）
 首頁、關於 DDF（`/about`）、探索空間（`/spaces`）、店家申請（`/list-your-space`）、我的刊登（`/my-spaces`）、登入／註冊／忘記密碼／重設密碼、管理後台（`/admin`）、店家刊登授權條款、素材使用規範。
@@ -61,7 +62,7 @@ public/             Logo、主視覺與用途卡片圖片
 1. 到 [supabase.com](https://supabase.com) 建立免費專案（Region 建議選 Tokyo 或 Singapore）。
 2. **執行資料庫 migration**（擇一）：
    - 用 Supabase CLI：`npx supabase link --project-ref <你的 project ref>`，接著 `npx supabase db push`
-   - 或在 Dashboard → SQL Editor，依檔名順序貼上 `supabase/migrations/` 三個檔案執行
+   - 或在 Dashboard → SQL Editor 貼上 `supabase/setup-all.sql`（三個 migration 合併版）執行一次
 3. Authentication → Providers：確認 **Email** 已開啟，並開啟 **Confirm email**（Email 驗證）。
 4. Authentication → URL Configuration：
    - Site URL：你的網站網址（本機開發用 `http://localhost:5173`）
@@ -112,7 +113,11 @@ npm run build   # 正式版建置
 - **Vercel／Netlify／Cloudflare Pages**：設定 SPA rewrite（建議，三者都有免費方案）
 - **GitHub Pages**：不支援 rewrite，需改用 HashRouter 或加 404.html 轉址
 
-在主機的環境變數中設定 `VITE_SUPABASE_URL` 與 `VITE_SUPABASE_ANON_KEY`。
+`.env.production` 已含公開的 Supabase URL 與 publishable key，部署時不需另外設定。
+
+### DEMO 示意內容（正式上線前務必關閉）
+首頁「設計師精選空間」「設計師真實評價」與贊助夥伴欄位，在**沒有真實資料時**會顯示標示 DEMO 的版面示意（假店家、評分、人物照）。
+正式上線前，把 `.env.production` 的 `VITE_SHOW_DEMO=true` 改成 `false` 再重新部署。有真實資料時，對應區塊會自動改顯示真實資料（真實資料不顯示星級）。
 
 ---
 

@@ -11,6 +11,7 @@ const empty = {
   official_website: '', official_social_url: '', price_range: '', opening_hours: '',
   wifi_available: '', power_outlets: '', seating_information: '', contact_email: '',
   large_tables: '', supports_events: '', event_capacity: '', group_friendly: '',
+  no_time_limit: '', minimum_charge: '', has_restroom: '',
   applicant_name: '', applicant_position: '', applicant_email: '',
   photo_url: '', logo_url: '',
 }
@@ -52,6 +53,8 @@ export default function ListYourSpace() {
         large_tables: tri(f.large_tables), supports_events: tri(f.supports_events),
         event_capacity: f.supports_events === 'yes' && f.event_capacity ? Number(f.event_capacity) : null,
         group_friendly: tri(f.group_friendly),
+        no_time_limit: tri(f.no_time_limit), has_restroom: tri(f.has_restroom),
+        minimum_charge: f.minimum_charge === '' ? null : Number(f.minimum_charge),
       },
       p_authorization: {
         applicant_name: f.applicant_name, applicant_position: f.applicant_position, applicant_email: f.applicant_email,
@@ -138,6 +141,9 @@ export default function ListYourSpace() {
               </label>
             </div>
             <div className="two">
+              <YesNo label="不限用餐時間" value={f.no_time_limit} onChange={upd('no_time_limit')} />
+              <YesNo label="店內有洗手間" value={f.has_restroom} onChange={upd('has_restroom')} />
+              <label className="field">低消金額（NT$，無低消填 0）<input type="number" min={0} max={10000} value={f.minimum_charge} onChange={upd('minimum_charge')} /></label>
               <YesNo label="有可放筆電＋繪圖板的大桌面" value={f.large_tables} onChange={upd('large_tables')} />
               <YesNo label="可接待設計師聚會（團體）" value={f.group_friendly} onChange={upd('group_friendly')} />
               <YesNo label="可租借辦活動／講座／工作坊" value={f.supports_events} onChange={upd('supports_events')} />

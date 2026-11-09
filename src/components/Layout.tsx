@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import Icon from './Icon'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 export default function Layout() {
@@ -16,26 +17,27 @@ export default function Layout() {
         <div className="bar">
           <Link to="/" className="brand" aria-label="DDF Designer Desk Fuel 首頁">
             <img src="/logo-mark.png" alt="" />
-            <span className="words">
-              <span className="w1 gold-text">DESIGNER</span>
-              <span className="w2">DESK FUEL</span>
-            </span>
+            <span className="ddf-word">DDF<span>.</span></span>
+            <span className="brand-name">Designer Desk Fuel</span>
           </Link>
           <nav className="main-nav" aria-label="主選單">
             <NavLink to="/about">關於 DDF</NavLink>
-            <NavLink to="/spaces">探索空間</NavLink>
-            <NavLink to="/listing-terms">刊登說明</NavLink>
-            <NavLink to="/list-your-space" className="merchant">店家申請刊登</NavLink>
+            <NavLink to="/spaces" end>探索空間</NavLink>
+            <NavLink to="/venues">活動場地</NavLink>
+            <NavLink to="/reviews">設計師評價</NavLink>
+            <NavLink to="/community">社群活動</NavLink>
+            <NavLink to="/partners">品牌合作</NavLink>
             {session && <NavLink to="/my-spaces">我的刊登</NavLink>}
             {isAdmin && <NavLink to="/admin">管理後台</NavLink>}
           </nav>
           <div className="header-actions">
+            <Link to="/spaces" className="icon-btn" aria-label="搜尋空間"><Icon name="search" size={22} stroke={1.8} /></Link>
             {session ? (
-              <button type="button" className="btn btn-ghost" onClick={signOut}>登出</button>
+              <button type="button" className="btn btn-outline-light" onClick={signOut}>登出</button>
             ) : (
               <>
-                <Link to="/login" className="btn btn-ghost">登入</Link>
-                <Link to="/login?mode=signup" className="btn btn-primary">註冊成為魔法師+</Link>
+                <Link to="/login" className="btn btn-outline-light">登入</Link>
+                <Link to="/login?mode=signup" className="btn btn-pink">註冊</Link>
               </>
             )}
           </div>
@@ -50,7 +52,7 @@ export default function Layout() {
         <div className="container row">
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             <img src="/logo-full.png" alt="DDF Designer Desk Fuel" style={{ height: 80, width: 'auto' }} />
-            <span style={{ fontSize: 13, color: 'var(--muted-2)' }}>Find Your Desk.<br />Fuel Your Creativity.</span>
+            <span style={{ fontSize: 13, color: 'var(--muted-2)' }}>Find Your Space.<br />Fuel Your Magic.</span>
           </div>
           <nav aria-label="法律與政策">
             <Link to="/privacy-policy">隱私權政策</Link>

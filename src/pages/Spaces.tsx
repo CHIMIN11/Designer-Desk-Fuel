@@ -20,6 +20,9 @@ export type PublicSpace = {
   supports_events: boolean | null
   event_capacity: number | null
   group_friendly: boolean | null
+  no_time_limit: boolean | null
+  minimum_charge: number | null
+  has_restroom: boolean | null
   official_website: string | null
   official_social_url: string | null
   last_verified_at: string | null
@@ -41,6 +44,9 @@ export default function Spaces() {
   const tables = params.get('tables') === '1'
   const events = params.get('events') === '1'
   const group = params.get('group') === '1'
+  const nolimit = params.get('nolimit') === '1'
+  const minimum = params.get('minimum') === '1'
+  const restroom = params.get('restroom') === '1'
 
   useEffect(() => {
     if (!supabase) return
@@ -56,12 +62,15 @@ export default function Spaces() {
         p_large_tables: tables ? true : null,
         p_events: events ? true : null,
         p_group: group ? true : null,
+        p_no_time_limit: nolimit ? true : null,
+        p_clear_minimum: minimum ? true : null,
+        p_restroom: restroom ? true : null,
       })
       .then(({ data, error }) => {
         if (error) setError(errorText(error))
         else setRows((data ?? []) as PublicSpace[])
       })
-  }, [city, category, price, wifi, power, tables, events, group])
+  }, [city, category, price, wifi, power, tables, events, group, nolimit, minimum, restroom])
 
   const set = (key: string, value: string) => {
     const next = new URLSearchParams(params)
@@ -72,7 +81,7 @@ export default function Spaces() {
 
   return (
     <div className="container page">
-      <h1>探索空間</h1>
+      <h1>{events ? '活動場地' : '探索空間'}</h1>
       <p className="lead">
         Workspace Directory：這裡只列出取得店家授權、並經 DDF 核對資料後公開的工作空間。資訊由店家提供，不代表推薦、認證或品質保證。
       </p>
@@ -99,6 +108,9 @@ export default function Spaces() {
         <div className="chips" role="group" aria-label="設備">
           <button type="button" className="chip chip-dark" aria-pressed={wifi} onClick={() => set('wifi', wifi ? '' : '1')}>Wi‑Fi</button>
           <button type="button" className="chip chip-dark" aria-pressed={power} onClick={() => set('power', power ? '' : '1')}>插座</button>
+          <button type="button" className="chip chip-dark" aria-pressed={nolimit} onClick={() => set('nolimit', nolimit ? '' : '1')}>不限時</button>
+          <button type="button" className="chip chip-dark" aria-pressed={minimum} onClick={() => set('minimum', minimum ? '' : '1')}>低消明確</button>
+          <button type="button" className="chip chip-dark" aria-pressed={restroom} onClick={() => set('restroom', restroom ? '' : '1')}>有洗手間</button>
           <button type="button" className="chip chip-dark" aria-pressed={tables} onClick={() => set('tables', tables ? '' : '1')}>大桌面</button>
           <button type="button" className="chip chip-dark" aria-pressed={events} onClick={() => set('events', events ? '' : '1')}>可辦活動／講座</button>
           <button type="button" className="chip chip-dark" aria-pressed={group} onClick={() => set('group', group ? '' : '1')}>可接待聚會</button>
@@ -139,6 +151,9 @@ export default function Spaces() {
                 <div><dt>價格區間</dt><dd>{s.data_stale ? '暫停顯示' : s.price_range ? PRICE[s.price_range] : '—'}</dd></div>
                 <div><dt>Wi‑Fi</dt><dd>{s.wifi_available == null ? '—' : s.wifi_available ? '有' : '無'}</dd></div>
                 <div><dt>插座</dt><dd>{s.power_outlets ? POWER[s.power_outlets] : '—'}</dd></div>
+                <div><dt>用餐時限</dt><dd>{s.no_time_limit == null ? '—' : s.no_time_limit ? '不限時' : '有時限（見營業時間）'}</dd></div>
+                <div><dt>低消</dt><dd>{s.data_stale ? '暫停顯示' : s.minimum_charge == null ? '—' : s.minimum_charge === 0 ? '無低消' : `NT$${s.minimum_charge}`}</dd></div>
+                <div><dt>洗手間</dt><dd>{yesNo(s.has_restroom)}</dd></div>
                 <div><dt>大桌面</dt><dd>{yesNo(s.large_tables)}</dd></div>
                 <div><dt>設計師聚會</dt><dd>{s.group_friendly == null ? '—' : s.group_friendly ? '可接待團體' : '不接待團體'}</dd></div>
                 <div style={{ gridColumn: '1 / -1' }}><dt>活動／講座</dt><dd>{s.supports_events == null ? '—' : s.supports_events ? `可租借辦活動${s.event_capacity ? `，約可容納 ${s.event_capacity} 人` : ''}` : '不提供'}</dd></div>

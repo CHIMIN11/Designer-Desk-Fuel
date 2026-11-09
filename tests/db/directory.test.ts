@@ -49,6 +49,9 @@ const space = (name = 'Studio One') => ({
   supports_events: true,
   event_capacity: 30,
   group_friendly: true,
+  no_time_limit: true,
+  minimum_charge: 150,
+  has_restroom: true,
   official_website: 'https://example.com',
   contact_email: 'owner@example.com',
 })
@@ -313,6 +316,16 @@ describe('活動場地與聚會篩選', () => {
     expect(ev.map((r) => r.id)).toContain(id)
     expect(ev[0].event_capacity).toBe(30)
     expect(await as('anon', 'select id from public.list_public_spaces(p_events => false)')).toHaveLength(0)
+    const work = await as<{ id: string; minimum_charge: number }>('anon', 'select id, minimum_charge from public.list_public_spaces(p_no_time_limit => true, p_clear_minimum => true, p_restroom => true)')
+    expect(work.map((r) => r.id)).toContain(id)
+    expect(work[0].minimum_charge).toBe(150)
+  })
+
+  it('withholds the minimum charge once data is stale', async () => {
+    const id = await publishFully()
+    await as('superuser', `update public.spaces set next_review_at = now() - interval '1 day' where id = $1`, [id])
+    const [row] = await as<{ minimum_charge: number | null }>('anon', 'select minimum_charge from public.list_public_spaces() where id = $1', [id])
+    expect(row.minimum_charge).toBeNull()
   })
 })
 

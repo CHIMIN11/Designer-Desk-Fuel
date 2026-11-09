@@ -174,6 +174,9 @@ create table public.spaces (
   supports_events      boolean,  -- accepts talks / workshops / events
   event_capacity       integer check (event_capacity between 1 and 2000),
   group_friendly       boolean,  -- accepts group meetups
+  no_time_limit        boolean,  -- no dining time limit (as stated by the business)
+  minimum_charge       integer check (minimum_charge between 0 and 10000), -- NT$, 0 = none; null = not provided
+  has_restroom         boolean,
   official_website     text check (official_website ~ '^https://'),
   official_social_url  text check (official_social_url ~ '^https://'),
   contact_email        text not null check (contact_email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
@@ -309,7 +312,8 @@ begin
   foreach col in array array[
     'business_name','address','city','district','category','price_range','opening_hours',
     'wifi_available','power_outlets','seating_information','large_tables','supports_events','event_capacity',
-    'group_friendly','official_website','official_social_url','contact_email','authorization_status','publication_status','last_verified_at','next_review_at','owner_id'
+    'group_friendly','no_time_limit','minimum_charge','has_restroom',
+    'official_website','official_social_url','contact_email','authorization_status','publication_status','last_verified_at','next_review_at','owner_id'
   ] loop
     if (o -> col) is distinct from (n -> col) then
       insert into public.space_update_logs (space_id, updated_by, field_name, old_value, new_value, update_source)
@@ -360,7 +364,10 @@ create or replace function public.list_public_spaces(
   p_power boolean default null,
   p_large_tables boolean default null,
   p_events boolean default null,
-  p_group boolean default null
+  p_group boolean default null,
+  p_no_time_limit boolean default null,
+  p_clear_minimum boolean default null,
+  p_restroom boolean default null
 )
 returns table (
   id uuid,
@@ -378,6 +385,9 @@ returns table (
   supports_events boolean,
   event_capacity integer,
   group_friendly boolean,
+  no_time_limit boolean,
+  minimum_charge integer,
+  has_restroom boolean,
   official_website text,
   official_social_url text,
   last_verified_at timestamptz,
@@ -395,6 +405,9 @@ as $$
     case when s.next_review_at is null or s.next_review_at <= now() then null else s.opening_hours end,
     s.wifi_available, s.power_outlets, s.seating_information,
     s.large_tables, s.supports_events, s.event_capacity, s.group_friendly,
+    s.no_time_limit,
+    case when s.next_review_at is null or s.next_review_at <= now() then null else s.minimum_charge end,
+    s.has_restroom,
     s.official_website, s.official_social_url, s.last_verified_at,
     (s.next_review_at is null or s.next_review_at <= now()) as data_stale
   from public.spaces s
@@ -407,6 +420,9 @@ as $$
     and (p_large_tables is null or s.large_tables = p_large_tables)
     and (p_events is null or s.supports_events = p_events)
     and (p_group is null or s.group_friendly = p_group)
+    and (p_no_time_limit is null or s.no_time_limit = p_no_time_limit)
+    and (p_clear_minimum is null or (p_clear_minimum = (s.minimum_charge is not null and s.next_review_at > now())))
+    and (p_restroom is null or s.has_restroom = p_restroom)
   order by s.city, s.district, s.business_name;
 $$;
 
@@ -472,6 +488,7 @@ begin
   insert into public.spaces (
     owner_id, business_name, address, city, district, category, price_range, opening_hours,
     wifi_available, power_outlets, seating_information, large_tables, supports_events, event_capacity, group_friendly,
+    no_time_limit, minimum_charge, has_restroom,
     official_website, official_social_url, contact_email
   ) values (
     uid,
@@ -489,6 +506,9 @@ begin
     (p_space ->> 'supports_events')::boolean,
     nullif(p_space ->> 'event_capacity', '')::integer,
     (p_space ->> 'group_friendly')::boolean,
+    (p_space ->> 'no_time_limit')::boolean,
+    nullif(p_space ->> 'minimum_charge', '')::integer,
+    (p_space ->> 'has_restroom')::boolean,
     nullif(trim(p_space ->> 'official_website'), ''),
     nullif(trim(p_space ->> 'official_social_url'), ''),
     trim(p_space ->> 'contact_email')
@@ -552,6 +572,7 @@ declare
   allowed text[] := array[
     'business_name','address','city','district','category','price_range','opening_hours','wifi_available',
     'power_outlets','seating_information','large_tables','supports_events','event_capacity','group_friendly',
+    'no_time_limit','minimum_charge','has_restroom',
     'official_website','official_social_url','contact_email'
   ];
   k text;
@@ -788,6 +809,9 @@ begin
       supports_events     = case when c ? 'supports_events' then (c ->> 'supports_events')::boolean else supports_events end,
       event_capacity      = case when c ? 'event_capacity' then (c ->> 'event_capacity')::integer else event_capacity end,
       group_friendly      = case when c ? 'group_friendly' then (c ->> 'group_friendly')::boolean else group_friendly end,
+      no_time_limit       = case when c ? 'no_time_limit' then (c ->> 'no_time_limit')::boolean else no_time_limit end,
+      minimum_charge      = case when c ? 'minimum_charge' then (c ->> 'minimum_charge')::integer else minimum_charge end,
+      has_restroom        = case when c ? 'has_restroom' then (c ->> 'has_restroom')::boolean else has_restroom end,
       official_website    = case when c ? 'official_website' then c ->> 'official_website' else official_website end,
       official_social_url = case when c ? 'official_social_url' then c ->> 'official_social_url' else official_social_url end,
       contact_email       = case when c ? 'contact_email' then c ->> 'contact_email' else contact_email end,
@@ -839,7 +863,7 @@ $$;
 -- Function privileges
 -- ---------------------------------------------------------------------------
 revoke all on function public.space_is_public(uuid) from public;
-revoke all on function public.list_public_spaces(text, text, text, boolean, boolean, boolean, boolean, boolean) from public;
+revoke all on function public.list_public_spaces(text, text, text, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) from public;
 revoke all on function public.list_public_space_assets(uuid) from public;
 revoke all on function public.require_login() from public;
 revoke all on function public.assert_space_owner(uuid) from public;
@@ -856,7 +880,7 @@ revoke all on function public.admin_review_update_request(uuid, text, text) from
 revoke all on function public.expire_space_authorizations() from public;
 revoke all on function public.log_space_changes() from public;
 
-grant execute on function public.list_public_spaces(text, text, text, boolean, boolean, boolean, boolean, boolean) to anon, authenticated;
+grant execute on function public.list_public_spaces(text, text, text, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to anon, authenticated;
 grant execute on function public.list_public_space_assets(uuid) to anon, authenticated;
 grant execute on function public.submit_space_application(jsonb, jsonb) to authenticated;
 grant execute on function public.add_space_asset(uuid, text, text, text) to authenticated;

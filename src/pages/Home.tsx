@@ -1,230 +1,304 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
+import { ReviewItem, type PublicReview } from '../components/SpaceReviews'
+import type { PublicSpace } from './Spaces'
 import { CATEGORY, CITIES, PRICE } from '../lib/labels'
 import { supabase } from '../lib/supabase'
-import { ReviewItem, type PublicReview } from '../components/SpaceReviews'
+import { DEMO_REVIEWS, DEMO_SPACES, SHOW_DEMO } from '../lib/demo'
 
 const HERO_ICONS = [
-  ['plug', '插座資訊', '店家提供'],
-  ['seat', '座位資訊', '桌面與座位'],
-  ['clock', '營業時間', '含用餐時限'],
-  ['price', '價格區間', '消費資訊'],
-  ['map', '探索空間', '附近的空間'],
+  ['laptop', '獨立工作', '深度創作'],
+  ['users', '設計師交流', '社群活動'],
+  ['calendar', '講座／工作坊', '作品發表'],
+  ['pen', '設計靈感', '空間策展'],
 ] as const
 
-const FEATURES = [
-  ['shield', '授權刊登', 'Authorized Listing'],
-  ['doc', '店家提供資訊', '營業時間 × 價格 × 官方連結'],
-  ['plug', '插座與 Wi‑Fi', '客觀設備資訊'],
-  ['seat', '座位與場地', '座位 × 桌面 × 用餐時限'],
-  ['calendar', '最後確認日期', '逾期自動標示待確認'],
+const CONDITIONS = [
+  ['power', '有插座'],
+  ['wifi', '免費 Wi‑Fi'],
+  ['nolimit', '不限時'],
+  ['minimum', '低消明確'],
+  ['restroom', '有洗手間'],
 ] as const
 
 const USE_CASES = [
-  { title: '一人工作', sub: '插座 × Wi‑Fi', img: '/usecase-solo.jpg', query: 'power=1&wifi=1' },
-  { title: '繪圖／修圖', sub: '大桌面 × 插座', img: '/usecase-drawing.jpg', query: 'tables=1&power=1' },
-  { title: '辦活動／講座', sub: '場地與容納人數', img: '/usecase-events.jpg', query: 'events=1' },
-  { title: '設計師聚會', sub: '可接待團體', img: '/usecase-meetup.jpg', query: 'group=1' },
+  { title: '一人工作', sub: '專注不被打擾', img: '/usecase-solo.jpg', query: 'power=1&wifi=1' },
+  { title: '繪圖／修圖', sub: '適合創作設備', img: '/usecase-drawing.jpg', query: 'tables=1&power=1' },
+  { title: '辦活動／講座', sub: '場地與設備', img: '/usecase-events.jpg', query: 'events=1' },
+  { title: '設計師聚會', sub: '交流 ＋ 人脈', img: '/usecase-meetup.jpg', query: 'group=1' },
 ]
+
+const IDEALS = [
+  ['laptop', '讓設計師有更多自由工作的選擇'],
+  ['users', '打造活躍的設計師交流社群'],
+  ['layers', '串連空間、活動與創意資源'],
+  ['chart', '成為台灣設計師的創意能量平台'],
+] as const
 
 const PARTNERS = [
   { handle: 'socialdesignlab_', url: 'https://www.instagram.com/socialdesignlab_/' },
   { handle: 'pptnight.tw', url: 'https://www.instagram.com/pptnight.tw/' },
 ]
 
+function Stars({ value }: { value: number }) {
+  return (
+    <span className="stars" aria-label={`DEMO 評分 ${value}`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span key={i} className={value >= i ? 'on' : value >= i - 0.5 ? 'half' : ''} aria-hidden="true">★</span>
+      ))}
+    </span>
+  )
+}
+
+const DemoTag = () => <span className="demo-tag">DEMO</span>
+
 export default function Home() {
   const navigate = useNavigate()
   const [mode, setMode] = useState<'work' | 'events'>('work')
-  const [category, setCategory] = useState('')
-  const [city, setCity] = useState('')
+  const [city, setCity] = useState('台北市')
+  const [category, setCategory] = useState('cafe')
   const [price, setPrice] = useState('')
-  const [wifi, setWifi] = useState(true)
-  const [power, setPower] = useState(true)
+  const [cond, setCond] = useState<Record<string, boolean>>({ power: true, wifi: true, nolimit: true })
+  const [spaces, setSpaces] = useState<PublicSpace[]>([])
   const [reviews, setReviews] = useState<PublicReview[]>([])
 
   useEffect(() => {
-    supabase?.rpc('list_public_reviews', { p_space_id: null, p_limit: 6 }).then(({ data }) => setReviews((data ?? []) as PublicReview[]))
+    if (!supabase) return
+    supabase.rpc('list_public_spaces', {}).then(({ data }) => setSpaces(((data ?? []) as PublicSpace[]).slice(0, 4)))
+    supabase.rpc('list_public_reviews', { p_space_id: null, p_limit: 3 }).then(({ data }) => setReviews((data ?? []) as PublicReview[]))
   }, [])
 
   const search = (e: React.FormEvent) => {
     e.preventDefault()
     const q = new URLSearchParams()
-    if (category) q.set('category', category)
-    if (mode === 'events') q.set('events', '1')
     if (city) q.set('city', city)
+    if (category) q.set('category', category)
     if (price) q.set('price', price)
-    if (wifi) q.set('wifi', '1')
-    if (power) q.set('power', '1')
+    if (mode === 'events') q.set('events', '1')
+    for (const [k] of CONDITIONS) if (cond[k]) q.set(k, '1')
     navigate(`/spaces?${q.toString()}`)
   }
 
+  const showDemoSpaces = spaces.length === 0 && SHOW_DEMO
+  const showDemoReviews = reviews.length === 0 && SHOW_DEMO
+
   return (
     <>
-      <section className="hero">
-        <div className="hero-media">
-          <img src="/hero.jpg" alt="設計師帶著筆電與繪圖板在咖啡店工作" />
+      {/* HERO */}
+      <section className="hero2">
+        <div className="hero2-media">
+          <img src="/hero-2.jpg" alt="設計師帶著筆電在咖啡店構思作品" />
           <div className="fade" aria-hidden="true" />
         </div>
-        <div className="hero-copy">
-          <p className="eyebrow">✦ DESIGNER DESK FUEL</p>
-          <h1 className="serif hero-title">
+        <div className="hero2-copy">
+          <p className="eyebrow">DESIGNER DESK FUEL</p>
+          <h1>
             設計師的<br />
-            工作空間 <span className="times">×</span> <span className="underline">創意據點</span>
+            工作空間 <span className="times">×</span> <span className="swoosh">創意據點</span>
           </h1>
-          <p className="sub">查詢授權刊登的工作空間 × 插座 Wi‑Fi 一次看清 × 一個人也自在</p>
-          <ul className="hero-icons">
-            {HERO_ICONS.map(([icon, title, sub]) => (
-              <li key={title}>
-                <Icon name={icon} size={40} stroke={1.3} />
-                <b>{title}</b>
-                <span>{sub}</span>
+          <p className="sub">找一個能專注工作、激發靈感，<br />也能舉辦活動、認識同好的地方。</p>
+          <ul className="hero2-icons">
+            {HERO_ICONS.map(([icon, a, b]) => (
+              <li key={a}>
+                <Icon name={icon} size={36} stroke={1.4} color="#ff4f9a" />
+                <span>{a}<br />{b}</span>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section className="container search-wrap" aria-label="搜尋工作空間">
-        <div className="tabs" role="tablist" aria-label="搜尋類型">
-          <button type="button" role="tab" aria-selected={mode === 'work'} className="tab" onClick={() => setMode('work')}>
-            找工作空間 <small>（咖啡店／工作基地）</small>
-          </button>
-          <button type="button" role="tab" aria-selected={mode === 'events'} className="tab" onClick={() => setMode('events')}>
-            找活動場地 <small>（講座／工作坊／聚會）</small>
-          </button>
+      {/* SEARCH */}
+      <section className="search2" aria-label="搜尋工作空間">
+        <div className="container">
+          <div className="tabs2" role="tablist" aria-label="搜尋類型">
+            <button type="button" role="tab" aria-selected={mode === 'work'} onClick={() => setMode('work')}>
+              <Icon name="laptop" size={22} /> 找工作空間 <small>（咖啡店／工作基地）</small>
+            </button>
+            <button type="button" role="tab" aria-selected={mode === 'events'} onClick={() => setMode('events')}>
+              <Icon name="calendar" size={22} /> 找活動場地 <small>（講座／工作坊／聚會）</small>
+            </button>
+          </div>
+          <form className="search2-card" onSubmit={search}>
+            <label className="sel">
+              <Icon name="map" size={22} />
+              <span><small>選擇地區</small>
+                <select value={city} onChange={(e) => setCity(e.target.value)}>
+                  <option value="">全部地區</option>
+                  {CITIES.map((c) => <option key={c}>{c}</option>)}
+                </select>
+              </span>
+            </label>
+            <label className="sel">
+              <Icon name="cup" size={22} />
+              <span><small>空間類型</small>
+                <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                  <option value="">全部類型</option>
+                  {Object.entries(CATEGORY).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              </span>
+            </label>
+            <label className="sel">
+              <Icon name="price" size={22} />
+              <span><small>價格區間</small>
+                <select value={price} onChange={(e) => setPrice(e.target.value)}>
+                  <option value="">不限價格</option>
+                  {Object.entries(PRICE).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              </span>
+            </label>
+            <fieldset className="conds">
+              <legend>設計師工作條件</legend>
+              {CONDITIONS.map(([k, label]) => (
+                <label key={k}>
+                  <input type="checkbox" checked={!!cond[k]} onChange={(e) => setCond({ ...cond, [k]: e.target.checked })} />
+                  {label}
+                </label>
+              ))}
+            </fieldset>
+            <button type="submit" className="btn btn-pink search2-go"><Icon name="search" size={22} stroke={2} /> 搜尋空間</button>
+          </form>
+
+          <ul className="usecases2" aria-label="依用途找空間">
+            {USE_CASES.map((u) => (
+              <li key={u.title}>
+                <Link to={`/spaces?${u.query}`}>
+                  <img src={u.img} alt="" />
+                  <span><b>{u.title}</b><small>{u.sub}</small></span>
+                  <span className="go" aria-hidden="true"><Icon name="arrow" size={16} stroke={2.4} /></span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-        <form className="search-card" onSubmit={search}>
-          <label className="field-light">
-            地區
-            <select value={city} onChange={(e) => setCity(e.target.value)}>
-              <option value="">全部地區</option>
-              {CITIES.map((c) => <option key={c}>{c}</option>)}
-            </select>
-          </label>
-          <label className="field-light">
-            空間類型
-            <select value={category} onChange={(e) => setCategory(e.target.value)}>
-              <option value="">全部類型</option>
-              {Object.entries(CATEGORY).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-          </label>
-          <label className="field-light">
-            價格區間
-            <select value={price} onChange={(e) => setPrice(e.target.value)}>
-              <option value="">不限價格</option>
-              {Object.entries(PRICE).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-          </label>
-          <fieldset style={{ border: 0, margin: 0, padding: 0, flex: '999 1 300px' }}>
-            <legend style={{ fontSize: 12, color: '#5e566b', marginBottom: 6, padding: 0 }}>空間資訊（依店家提供資料篩選）</legend>
-            <div className="chips">
-              <button type="button" className="chip" aria-pressed={wifi} onClick={() => setWifi(!wifi)}>Wi‑Fi</button>
-              <button type="button" className="chip" aria-pressed={power} onClick={() => setPower(!power)}>插座</button>
-            </div>
-          </fieldset>
-          <button type="submit" className="btn btn-primary" style={{ minHeight: 52, fontSize: 17, padding: '0 28px' }}>
-            <Icon name="search" size={20} stroke={2} /> 搜尋空間
-          </button>
-        </form>
-        <ul className="usecases" aria-label="依用途找空間">
-          {USE_CASES.map((u) => (
-            <li key={u.title}>
-              <Link to={`/spaces?${u.query}`} className="usecase">
-                <img src={u.img} alt="" />
-                <span><b>{u.title}</b><small>{u.sub}</small></span>
-                <span className="go" aria-hidden="true"><Icon name="arrow" size={16} stroke={2.2} /></span>
-              </Link>
-            </li>
-          ))}
-        </ul>
       </section>
 
-      <div className="container">
-        <ul className="features" aria-label="目錄刊登原則">
-          {FEATURES.map(([icon, title, sub]) => (
-            <li key={title} className="feature">
-              <span className="ic"><Icon name={icon} size={26} stroke={1.5} /></span>
-              <span><b>{title}</b><small>{sub}</small></span>
-            </li>
-          ))}
-          <li>
-            <Link to="/list-your-space" className="feature feature-hl">
-              <span className="ic" style={{ borderRadius: 14 }}><Icon name="store" size={26} stroke={1.5} /></span>
-              <span><b>店家申請刊登</b><small>List Your Space →</small></span>
-            </Link>
-          </li>
-        </ul>
+      {/* FOUNDER */}
+      <section className="founder" aria-labelledby="founder-title">
+        <div className="founder-photo">
+          <img src="/founder.jpg" alt="DDF 發起人" />
+          <p className="founder-sign"><small>發起人 / Founder</small><span>Chimin_design</span></p>
+        </div>
+        <div className="founder-copy">
+          <h2 id="founder-title">發起人與我的理想 <em>Founder’s Vision</em></h2>
+          <blockquote>
+            「為設計師打造一個<br />
+            工作 × <span>創作</span> × <span className="blue">交流</span> × <span>發聲</span>的基地。」
+          </blockquote>
+          <p>
+            我是一位設計師，也曾在城市中不斷尋找適合工作的咖啡店、能舉辦活動的空間，以及可以認識同好的創意社群。
+            因此，我創立了 Designer Desk Fuel（DDF），希望讓每一位設計師都能更容易找到理想的工作場域、舉辦活動、分享作品，並在這裡遇見一起創造的夥伴。
+          </p>
+        </div>
+        <div className="founder-ideals">
+          <h3>我的理想</h3>
+          <ul>
+            {IDEALS.map(([icon, text]) => (
+              <li key={text}><Icon name={icon} size={26} stroke={1.5} color="#ff4f9a" />{text}</li>
+            ))}
+          </ul>
+          <Link to="/about" className="btn btn-outline-pink">閱讀完整故事 →</Link>
+        </div>
+      </section>
 
-        <section className="panels">
-          <article className="panel" id="about">
-            <p className="eyebrow" style={{ fontSize: 13 }}>✦ WORK. CREATE. CONNECT. REFUEL.</p>
-            <h2 className="serif">設計師的工作・<span className="gold-text">創意據點</span></h2>
-            <p>身為科技業設計師，經常在台北與桃園尋找適合工作的空間。卻總遇到插座不足、筆電電力告急、限時使用，或環境吵雜而無法專心創作的困境。</p>
-            <p>我相信，設計師需要的不只是一張桌子，而是一個能自由工作、激發靈感、交流想法的創作基地。</p>
-            <span className="ribbon">因此，我們打造 DDF。</span>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: 20, color: 'var(--gold)' }}>Find Your Space. Fuel Your Magic.</p>
-            <Link to="/about" className="btn btn-ghost">閱讀完整故事 →</Link>
-          </article>
-
-          <article className="panel" style={{ flex: '1.4 1 420px', display: 'flex', flexDirection: 'column' }}>
-            <h2 className="serif" style={{ display: 'flex', gap: 12, alignItems: 'baseline', flexWrap: 'wrap' }}>
-              探索空間 <span style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: 500 }}>Workspace Directory</span>
-            </h2>
-            <p>查詢已取得店家授權、經資料核對後公開的工作空間。每筆資料都標示最後確認日期；超過複查期限的價格與營業時間會暫停顯示。</p>
-            <ul style={{ color: '#d6d1de', fontSize: 14, lineHeight: 1.9, paddingLeft: 20, margin: 0 }}>
-              <li>只顯示客觀資訊：地區、類別、價格區間、Wi‑Fi、插座、營業時間、座位</li>
-              <li>不做推薦、評分或排名</li>
-              <li>店家可隨時申請更新、暫停或撤回刊登</li>
-            </ul>
-            <Link to="/spaces" className="btn btn-gold" style={{ alignSelf: 'center', marginTop: 'auto', minHeight: 48, padding: '0 30px', fontSize: 17 }}>
-              開啟探索空間 <Icon name="arrow" size={18} stroke={2} />
-            </Link>
-          </article>
-
-          <article className="panel" style={{ background: '#fff', color: '#221c2b', borderColor: '#e9d8f5' }}>
-            <p style={{ color: '#5e566b', margin: 0, fontSize: 13, letterSpacing: '0.2em' }}>FOR BUSINESSES</p>
-            <h2 className="serif" style={{ color: '#221c2b' }}>店家刊登流程</h2>
-            <ol style={{ paddingLeft: 20, fontSize: 14, lineHeight: 2, color: '#3a3346' }}>
-              <li>店家提交申請與授權範圍</li>
-              <li>DDF 驗證申請人身份與授權資格</li>
-              <li>核對地址、價格、營業時間與官方連結</li>
-              <li>審核通過後才公開上架</li>
-              <li>可隨時申請修改、暫停或撤回</li>
-            </ol>
-            <p style={{ color: '#5e566b', fontSize: 13 }}>送出申請不代表自動取得刊登資格。刊登不代表推薦、認證或品質保證。</p>
-            <Link to="/list-your-space" className="btn btn-primary">我是店家，申請刊登</Link>
-          </article>
-        </section>
-
-        <section className="home-reviews" aria-labelledby="reviews-title">
-          <h2 id="reviews-title">設計師真實評價 <small>Real Reviews by Designers</small></h2>
-          {reviews.length > 0 ? (
-            <ul className="review-list">{reviews.map((r) => <ReviewItem key={r.id} r={r} showSpace />)}</ul>
-          ) : (
-            <p className="notice notice-info">
-              這裡會顯示會員在已刊登空間留下的第一手心得，不使用星級或排名。目前還沒有評價，歡迎 <Link to="/spaces">探索空間</Link> 後分享你的經驗。
-            </p>
+      {/* LIGHT SECTION */}
+      <div className="light">
+        <section className="container picks" aria-labelledby="picks-title">
+          <div className="sec-head">
+            <h2 id="picks-title">設計師精選空間 <em>Designers’ Pick</em></h2>
+            <Link to="/spaces">查看更多空間 →</Link>
+          </div>
+          {showDemoSpaces && (
+            <p className="demo-note">DEMO 示意：以下店家、照片與評分皆為版面示意，並非真實店家，正式上線前移除。</p>
+          )}
+          <div className="picks-grid">
+            {spaces.length > 0 && spaces.map((s) => (
+              <Link key={s.id} to={`/spaces?city=${encodeURIComponent(s.city)}`} className="pick">
+                <div className="pick-img pick-img-empty"><Icon name="cup" size={40} color="#c9c3d3" /></div>
+                <div className="pick-body">
+                  <h3>{s.business_name}</h3>
+                  <p><Icon name="map" size={16} /> {s.city}{s.district ? ` · ${s.district}` : ''}</p>
+                  {s.minimum_charge != null && <p><Icon name="cup" size={16} /> 低消 NT${s.minimum_charge}</p>}
+                  <p className="pick-tags">
+                    {s.power_outlets && s.power_outlets !== 'none' && <span>有插座</span>}
+                    {s.wifi_available && <span>Wi‑Fi</span>}
+                    {s.no_time_limit && <span>不限時</span>}
+                  </p>
+                </div>
+              </Link>
+            ))}
+            {showDemoSpaces && DEMO_SPACES.map((s) => (
+              <article key={s.name} className="pick">
+                <div className="pick-img">
+                  <img src={s.img} alt="" />
+                  <span className="rating">★ {s.rating} ({s.count})</span>
+                  <DemoTag />
+                </div>
+                <div className="pick-body">
+                  <h3>{s.name} <small>{s.en}</small></h3>
+                  <p><Icon name="map" size={16} /> {s.area}</p>
+                  <p><Icon name="cup" size={16} /> 低消 NT${s.min}</p>
+                  <p className="pick-tags"><span>有插座</span><span>Wi‑Fi</span><span>不限時</span></p>
+                </div>
+              </article>
+            ))}
+            <aside className="join">
+              <h3>加入 DDF 社群</h3>
+              <p>與更多設計師一起<br />探索、分享、創造！</p>
+              <Link to="/login?mode=signup" className="btn btn-pink">免費註冊 »</Link>
+              <ul>
+                <li>查詢授權刊登的工作空間</li>
+                <li>發表設計師評價</li>
+                <li>店家申請刊登</li>
+              </ul>
+            </aside>
+          </div>
+          {spaces.length === 0 && !SHOW_DEMO && (
+            <p className="empty-light">目前還沒有公開的空間。<Link to="/list-your-space">店家申請刊登 →</Link></p>
           )}
         </section>
 
-        <section className="partners" aria-label="合作贊助夥伴">
-          <div style={{ paddingRight: 24, borderRight: '1px solid var(--line-2)' }}>
-            <p style={{ margin: 0, fontSize: 17 }}>合作贊助夥伴</p>
-            <p style={{ margin: '2px 0 0', fontSize: 12, letterSpacing: '0.22em', color: 'var(--muted)' }}>OUR PARTNERS</p>
+        <section className="container reviews2" aria-labelledby="reviews-title">
+          <div className="sec-head">
+            <h2 id="reviews-title">設計師真實評價 <em>Real Reviews by Designers</em></h2>
+            <Link to="/reviews">看全部評價 →</Link>
           </div>
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', flex: '1 1 auto' }}>
-            {PARTNERS.map((p) => (
-              <a key={p.handle} href={p.url} target="_blank" rel="noopener noreferrer" className="partner">
-                <Icon name="instagram" size={18} /> @{p.handle}
-              </a>
-            ))}
-          </div>
-          <p style={{ margin: 0, fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: 19, lineHeight: 1.35 }}>
-            Designers. Spaces.<br />Community. Magic.
-          </p>
+          {showDemoReviews && <p className="demo-note">DEMO 示意：以下評價與人物為版面示意，並非真實會員評價，正式上線前移除。</p>}
+          {reviews.length > 0 && <ul className="review-list review-list-light">{reviews.map((r) => <ReviewItem key={r.id} r={r} showSpace />)}</ul>}
+          {showDemoReviews && (
+            <div className="reviews2-grid">
+              {DEMO_REVIEWS.map((r) => (
+                <article key={r.name} className="rv">
+                  <img src={r.img} alt="" />
+                  <div>
+                    <p className="rv-who">{r.role}　<b>{r.name}</b> <DemoTag /></p>
+                    <Stars value={r.stars} />
+                    <p className="rv-text">「{r.text}」</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+          {reviews.length === 0 && !SHOW_DEMO && <p className="empty-light">還沒有評價，歡迎 <Link to="/spaces">探索空間</Link> 後分享你的經驗。</p>}
         </section>
       </div>
+
+      {/* PARTNERS */}
+      <section className="partners2" aria-label="合作贊助夥伴">
+        <div className="container partners2-row">
+          <div className="p-title"><b>合作贊助夥伴</b><small>OUR PARTNERS</small></div>
+          <div className="p-logos">
+            {PARTNERS.map((p) => (
+              <a key={p.handle} href={p.url} target="_blank" rel="noopener noreferrer" className="partner2">
+                <Icon name="instagram" size={20} /> @{p.handle}
+              </a>
+            ))}
+            {SHOW_DEMO && [1, 2, 3].map((i) => <span key={i} className="partner2 partner2-demo">贊助夥伴 Logo <DemoTag /></span>)}
+          </div>
+          <Link to="/partners" className="btn btn-outline-light">成為 DDF 贊助夥伴 →</Link>
+        </div>
+      </section>
     </>
   )
 }

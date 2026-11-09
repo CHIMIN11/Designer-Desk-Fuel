@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -10,6 +10,7 @@ import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/admin/Admin'
 import { AssetGuidelines, LegalPlaceholder, ListingTerms } from './pages/Legal'
 import NotFound from './pages/NotFound'
+import { Community, Partners, Reviews } from './pages/Extra'
 
 export default function App() {
   return (
@@ -18,6 +19,10 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="about" element={<About />} />
         <Route path="spaces" element={<Spaces />} />
+        <Route path="venues" element={<Navigate to="/spaces?events=1" replace />} />
+        <Route path="reviews" element={<Reviews />} />
+        <Route path="community" element={<Community />} />
+        <Route path="partners" element={<Partners />} />
         <Route path="list-your-space" element={<ListYourSpace />} />
         <Route path="my-spaces" element={<MySpaces />} />
         <Route path="login" element={<Login />} />
