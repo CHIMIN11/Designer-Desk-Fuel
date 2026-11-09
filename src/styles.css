@@ -547,7 +547,7 @@ html, body { overflow-x: hidden; }
   .mg-hero-copy { margin-top: -28px; padding: 0 16px 92px; }
   .mg-eyebrow { font-size: 11px; letter-spacing: 0.28em; }
   .mg-title { font-size: 34px; gap: 0 8px; margin-top: 10px; }
-  .mg-title svg { width: 16px; height: 16px; }
+  .mg-title > svg { width: 16px; height: 16px; }
   .mg-sub { font-size: 14px; letter-spacing: 0.04em; line-height: 1.8; }
   .mg-sub i { margin: 0 4px; }
   .hscroll { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; margin-left: -16px !important; margin-right: -16px !important; padding: 0 16px !important; }
@@ -662,26 +662,14 @@ html, body { overflow-x: hidden; }
 @media (max-width: 760px) { .brand-name { display: inline; font-size: 16px; } .brand { gap: 8px; } }
 @media (max-width: 520px) { .brand-name { display: inline !important; } }
 
-/* Orbit that wraps the headline only (subtitle sits below, never under the line) */
-.title-orbit { position: relative; display: inline-block; max-width: 100%; padding: 6px 56px 26px 0; isolation: isolate; }
-.mg-hero-copy > .title-orbit { max-width: 100%; }
-.title-orbit .mg-title { position: relative; z-index: 1; margin: 0; padding: 0; }
-.title-orbit .mg-title .gold-text { filter: drop-shadow(0 0 14px rgba(231,194,122,0.35)); }
-.title-orbit .orbit { position: absolute; left: -28px; top: -4px; width: calc(100% + 28px); height: calc(100% + 8px); overflow: visible; pointer-events: none; z-index: 0; }
-.title-orbit .orbit path { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.title-orbit .orbit-back { stroke: rgba(231,194,122,0.35); stroke-width: 1.2; }
-.title-orbit .orbit-front { stroke: url(#orbitGold); stroke-width: 3.2; }
-.title-orbit .orbit-shine { stroke: #fff; stroke-width: 2; stroke-dasharray: 60 1400; opacity: 0.9; animation: orbit-shine 5s ease-in-out infinite; }
-.orbit-star { position: absolute; z-index: 2; line-height: 0; pointer-events: none; }
-.orbit-star-1 { right: 14px; top: 0; filter: drop-shadow(0 0 8px rgba(255,240,200,0.95)); animation: ring-twinkle 2.8s ease-in-out infinite; }
-.orbit-star-2 { left: -24px; bottom: 2px; animation: ring-twinkle 3.6s ease-in-out infinite 0.8s; }
-@keyframes orbit-shine { 0% { stroke-dashoffset: 1460; } 65%, 100% { stroke-dashoffset: 0; } }
-@media (prefers-reduced-motion: reduce) { .title-orbit .orbit-shine { display: none; } .orbit-star { animation: none !important; } }
-.title-orbit + .mg-sub { margin-top: 14px; }
-@media (max-width: 760px) {
-  .title-orbit { display: block; padding: 4px 34px 22px 0; }
-  .title-orbit .mg-title { font-size: 32px; }
-  .title-orbit .orbit { left: -12px; width: calc(100% + 12px); }
-  .orbit-star-1 { right: 4px; }
-  .orbit-star-2 { left: -8px; }
-}
+/* Refined gold swooshes (as in the original mockup) */
+.swoosh-wrap { position: relative; display: inline-block; }
+.swoosh-wrap .gold-text { position: relative; z-index: 1; filter: drop-shadow(0 0 12px rgba(231,194,122,0.3)); }
+.swoosh-right { position: absolute; left: calc(100% - 1.3em); top: -0.42em; width: 2.3em; height: 1.75em; z-index: 0; overflow: visible; filter: drop-shadow(0 0 4px rgba(255,226,160,0.75)); pointer-events: none; }
+.swoosh-star { position: absolute; right: -0.95em; top: -0.55em; line-height: 0; filter: drop-shadow(0 0 6px rgba(255,240,200,0.95)); animation: ring-twinkle 2.8s ease-in-out infinite; }
+.mg-sub { position: relative; }
+.swoosh-left { position: absolute; left: -2.5em; top: -0.95em; width: 4.6em; height: 1.75em; overflow: visible; filter: drop-shadow(0 0 4px rgba(255,226,160,0.8)); pointer-events: none; }
+.mg-title { padding-right: 1.1em; }
+.mg-hero-copy > .mg-title { max-width: 64vw; }
+@media (prefers-reduced-motion: reduce) { .swoosh-star { animation: none; } }
+@media (max-width: 760px) { .swoosh-left { left: -1.2em; width: 3.6em; top: 1.1em; height: 1.3em; transform: scaleY(-1); } }

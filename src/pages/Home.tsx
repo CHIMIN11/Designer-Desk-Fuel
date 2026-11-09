@@ -86,34 +86,38 @@ export default function Home() {
         </div>
         <div className="mg-hero-copy">
           <p className="mg-eyebrow"><Sparkle size={11} /> DESIGNER DESK FUEL</p>
-          <div className="title-orbit">
-            <h1 className="mg-title">
-              <span>設計師的工作</span>
-              <Sparkle size={18} color="#e7c27a" />
+          <h1 className="mg-title">
+            <span>設計師的工作</span>
+            <Sparkle size={18} color="#e7c27a" />
+            <span className="swoosh-wrap">
               <span className="gold-text">創意據點</span>
-            </h1>
-            <svg className="orbit" viewBox="0 0 800 240" preserveAspectRatio="none" aria-hidden="true">
+              <svg className="swoosh-right" viewBox="0 0 260 200" aria-hidden="true">
+                <defs>
+                  <linearGradient id="swGold" x1="1" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#fff3d0" stopOpacity="0.1" />
+                    <stop offset="0.3" stopColor="#fff0c8" />
+                    <stop offset="0.6" stopColor="#e7c27a" />
+                    <stop offset="1" stopColor="#b98a3e" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path d="M70 12 C170 14 254 54 248 104 C242 150 160 182 4 190 C140 174 222 146 226 104 C230 64 168 30 70 12 Z" fill="url(#swGold)" />
+              </svg>
+              <span className="swoosh-star"><Sparkle size={16} color="#fff6dc" /></span>
+            </span>
+          </h1>
+          <p className="mg-sub">
+            <svg className="swoosh-left" viewBox="0 0 200 70" aria-hidden="true">
               <defs>
-                <linearGradient id="orbitGold" x1="0" y1="1" x2="1" y2="0">
-                  <stop offset="0" stopColor="#b98a3e" stopOpacity="0" />
-                  <stop offset="0.18" stopColor="#c99a4e" stopOpacity="0.7" />
-                  <stop offset="0.7" stopColor="#fff0c8" />
-                  <stop offset="0.88" stopColor="#e7c27a" />
-                  <stop offset="1" stopColor="#e7c27a" stopOpacity="0" />
+                <linearGradient id="swGoldL" x1="1" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#e7c27a" stopOpacity="0" />
+                  <stop offset="0.45" stopColor="#f6dda6" />
+                  <stop offset="1" stopColor="#b98a3e" stopOpacity="0.15" />
                 </linearGradient>
-                <filter id="orbitGlow" x="-10%" y="-40%" width="120%" height="180%">
-                  <feGaussianBlur stdDeviation="2.6" result="b" />
-                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
               </defs>
-              <path className="orbit-back" d="M690 22 C520 -4 230 4 70 52" />
-              <path className="orbit-front" d="M14 226 C130 186 430 188 650 142 C772 116 806 74 776 44 C752 20 716 18 690 22" filter="url(#orbitGlow)" />
-              <path className="orbit-shine" d="M14 226 C130 186 430 188 650 142 C772 116 806 74 776 44 C752 20 716 18 690 22" />
+              <path d="M196 4 C120 2 34 16 10 40 C-2 54 22 66 70 64 C34 60 18 52 24 42 C44 22 120 8 196 4 Z" fill="url(#swGoldL)" />
             </svg>
-            <span className="orbit-star orbit-star-1"><Sparkle size={22} color="#fff0c8" /></span>
-            <span className="orbit-star orbit-star-2"><Sparkle size={12} color="#e7c27a" /></span>
-          </div>
-          <p className="mg-sub">找到適合工作的空間 <i>×</i> 認識同頻的設計師 <i>×</i> 激發創作靈感</p>
+            找到適合工作的空間 <i>×</i> 認識同頻的設計師 <i>×</i> 激發創作靈感
+          </p>
           <ul className="mg-icons hscroll">
             {HERO_ICONS.map(([icon, a, b]) => (
               <li key={a}><Icon name={icon} size={38} stroke={1.2} /><b>{a}</b><span>{b}</span></li>
