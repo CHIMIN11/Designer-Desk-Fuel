@@ -86,33 +86,34 @@ export default function Home() {
         </div>
         <div className="mg-hero-copy">
           <p className="mg-eyebrow"><Sparkle size={11} /> DESIGNER DESK FUEL</p>
-          <h1 className="mg-title">
-            <span>設計師的工作空間</span>
-            <Sparkle size={20} color="#e7c27a" />
-            <span className="magic-ring">
+          <div className="title-orbit">
+            <h1 className="mg-title">
+              <span>設計師的工作</span>
+              <Sparkle size={18} color="#e7c27a" />
               <span className="gold-text">創意據點</span>
-              <svg className="ring" viewBox="0 0 400 140" aria-hidden="true" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="ringGold" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0" stopColor="#b98a3e" stopOpacity="0" />
-                    <stop offset="0.25" stopColor="#e7c27a" />
-                    <stop offset="0.6" stopColor="#fff0c8" />
-                    <stop offset="1" stopColor="#e7c27a" stopOpacity="0.2" />
-                  </linearGradient>
-                  <filter id="ringGlow" x="-20%" y="-50%" width="140%" height="200%">
-                    <feGaussianBlur stdDeviation="2.4" result="b" />
-                    <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-                  </filter>
-                </defs>
-                {/* back half of the orbit (behind the text) and front sweep */}
-                <path className="ring-back" d="M60 30 C150 2 330 4 384 40" />
-                <path className="ring-front" d="M384 40 C412 78 330 122 200 128 C90 133 8 112 14 84 C18 66 40 54 66 48" filter="url(#ringGlow)" />
-                <path className="ring-shine" d="M384 40 C412 78 330 122 200 128 C90 133 8 112 14 84 C18 66 40 54 66 48" />
-              </svg>
-              <Sparkle size={22} color="#fff0c8" />
-            </span>
-          </h1>
-          <p className="mg-sub">找到適合工作的空間 <i>×</i> 認識同頻的設計師 <i>×</i> 激發創作靈感</p>
+            </h1>
+            <p className="mg-sub">找到適合工作的空間 <i>×</i> 認識同頻的設計師 <i>×</i> 激發創作靈感</p>
+            <svg className="orbit" viewBox="0 0 800 240" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="orbitGold" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0" stopColor="#b98a3e" stopOpacity="0" />
+                  <stop offset="0.18" stopColor="#c99a4e" stopOpacity="0.7" />
+                  <stop offset="0.7" stopColor="#fff0c8" />
+                  <stop offset="0.88" stopColor="#e7c27a" />
+                  <stop offset="1" stopColor="#e7c27a" stopOpacity="0" />
+                </linearGradient>
+                <filter id="orbitGlow" x="-10%" y="-40%" width="120%" height="180%">
+                  <feGaussianBlur stdDeviation="2.6" result="b" />
+                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
+              <path className="orbit-back" d="M690 22 C520 -4 230 4 70 52" />
+              <path className="orbit-front" d="M14 226 C130 186 430 188 650 142 C772 116 806 74 776 44 C752 20 716 18 690 22" filter="url(#orbitGlow)" />
+              <path className="orbit-shine" d="M14 226 C130 186 430 188 650 142 C772 116 806 74 776 44 C752 20 716 18 690 22" />
+            </svg>
+            <span className="orbit-star orbit-star-1"><Sparkle size={22} color="#fff0c8" /></span>
+            <span className="orbit-star orbit-star-2"><Sparkle size={12} color="#e7c27a" /></span>
+          </div>
           <ul className="mg-icons hscroll">
             {HERO_ICONS.map(([icon, a, b]) => (
               <li key={a}><Icon name={icon} size={38} stroke={1.2} /><b>{a}</b><span>{b}</span></li>
