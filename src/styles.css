@@ -1225,3 +1225,18 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 60; pointer-event
 .mg-chat-input:hover { border-color: rgba(217,188,132,0.5); color: var(--champagne); }
 @media (max-width: 760px) { .mg-panel { padding: 24px 20px; } .mg-chat { padding: 0; } .mg-chat-body nav { border-right: 0; border-bottom: 1px solid var(--hair); } }
 @media (max-width: 760px) { .mg-chat-body nav a.on::before { display: none; } .mg-chat-body nav a.on { border-color: rgba(217,188,132,0.6); } }
+
+/* Profile pickers */
+.skill-picker { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+.skill-picker legend { padding: 0; margin-bottom: 10px; }
+.skill-picker .hint { color: var(--muted-2); font-size: 12px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--hair-2); background: transparent; color: #d9d3e3; border-radius: 999px; padding: 7px 14px; font-size: 13px; cursor: pointer; transition: border-color .2s, background .2s, color .2s; min-height: 36px; }
+.chip:hover:not(:disabled) { border-color: rgba(217,188,132,0.6); color: #fff; }
+.chip.on { background: rgba(217,188,132,0.14); border-color: var(--gold); color: #fff; }
+.chip.on::before { content: '✓ '; color: var(--gold); }
+.chip:disabled { opacity: .35; cursor: not-allowed; }
+.skill-add { display: flex; gap: 8px; margin-top: 12px; max-width: 460px; }
+.skill-add input { flex: 1; min-width: 0; }
+.skill-add .btn { min-height: 44px; }
+fieldset.field.skill-picker { border: 0 !important; padding: 0 !important; background: none !important; margin: 4px 0 0 !important; } fieldset.field.skill-picker legend { font-size: 14px; font-weight: 500; color: inherit; padding: 0 !important; }

@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth'
 import { formatDate } from '../lib/labels'
 import { errorText, supabase } from '../lib/supabase'
 import Icon from '../components/Icon'
+import { PROFESSIONS, REGIONS, SelectOrOther, SkillPicker } from '../components/ProfilePickers'
 import ImagePicker from '../components/ImagePicker'
 import { PHOTO_NOTE, REVIEW_TAGS, ReviewPhotos } from '../components/SpaceReviews'
 import { deleteReviewPhotos, uploadReviewPhotos } from '../lib/upload'
@@ -19,7 +20,7 @@ type Msg = { kind: 'ok' | 'error'; text: string } | null
 
 function ProfileEditor({ uid }: { uid: string }) {
   const [f, setF] = useState<Record<string, string>>({})
-  const [skills, setSkills] = useState('')
+  const [skills, setSkills] = useState<string[]>([])
   const [showPortfolio, setShowPortfolio] = useState(true)
   const [msg, setMsg] = useState<Msg>(null)
   const [busy, setBusy] = useState(false)
@@ -33,7 +34,7 @@ function ProfileEditor({ uid }: { uid: string }) {
         location: (p.location as string) ?? '', bio: (p.bio as string) ?? '', portfolio_url: (p.portfolio_url as string) ?? '',
         avatar_url: (p.avatar_url as string) ?? '', profile_visibility: (p.profile_visibility as string) ?? 'private',
       })
-      setSkills(((p.skills as string[]) ?? []).join(', '))
+      setSkills((p.skills as string[]) ?? [])
       setShowPortfolio((p.show_portfolio as boolean) ?? true)
     })
   }, [uid])
@@ -44,7 +45,7 @@ function ProfileEditor({ uid }: { uid: string }) {
     setMsg(null)
     const payload = {
       ...Object.fromEntries(Object.entries(f).map(([k, v]) => [k, v.trim() === '' && k !== 'member_type' && k !== 'profile_visibility' ? null : v.trim()])),
-      skills: skills.split(/[,，]/).map((s) => s.trim()).filter(Boolean).slice(0, 12),
+      skills: skills.slice(0, 12),
       show_portfolio: showPortfolio,
     }
     // RLS lets a member update only their own row (columns are limited by grants).
@@ -84,10 +85,10 @@ function ProfileEditor({ uid }: { uid: string }) {
               {Object.entries(MEMBER_TYPE).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </label>
-          <label className="field">職業／專長<input maxLength={60} placeholder="例：UI／UX 設計師" value={f.profession ?? ''} onChange={set('profession')} /></label>
-          <label className="field">所在地區<input maxLength={40} placeholder="例：台北市" value={f.location ?? ''} onChange={set('location')} /></label>
-          <label className="field">技能（以逗號分隔，最多 12 項）<input placeholder="例：Figma, 品牌設計, 插畫" value={skills} onChange={(e) => setSkills(e.target.value)} /></label>
+          <SelectOrOther label="職業／專長" options={PROFESSIONS} value={f.profession ?? ''} onChange={(v) => setF({ ...f, profession: v })} maxLength={60} placeholder="例：遊戲美術" />
+          <SelectOrOther label="所在地區" options={REGIONS} value={f.location ?? ''} onChange={(v) => setF({ ...f, location: v })} maxLength={40} placeholder="例：東京" />
         </div>
+        <SkillPicker value={skills} onChange={setSkills} />
         <label className="field">自我介紹<textarea maxLength={500} value={f.bio ?? ''} onChange={set('bio')} /><span className="hint">{(f.bio ?? '').length}/500</span></label>
       </fieldset>
       <fieldset>
