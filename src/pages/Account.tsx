@@ -218,7 +218,7 @@ export default function Account() {
     <div className="container page">
       <p className="ab-kicker">Member Center</p>
       <h1>會員中心</h1>
-      <p className="lead">管理你的設計師個人資料與評價。店家刊登請到 <Link to="/my-spaces">我的刊登</Link>。</p>
+      <p className="lead">管理你的設計師個人資料與評價。經營空間的店家，請到 <Link to="/merchant">店家中心</Link>。</p>
       <div className="admin-tabs" role="tablist">
         {TABS.map(([id, label]) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} className={`btn ${tab === id ? 'btn-magic' : 'btn-pill-outline'}`} onClick={() => setParams(id === 'profile' ? {} : { tab: id })}>{label}</button>

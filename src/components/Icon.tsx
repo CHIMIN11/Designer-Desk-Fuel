@@ -25,6 +25,8 @@ const paths: Record<string, string> = {
   chat: 'M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-5 4v-4H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM8 10h.01M12 10h.01M16 10h.01',
   bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
   menu: 'M4 7h16M4 12h16M4 17h16',
+  plus: 'M12 5v14M5 12h14',
+  store2: 'M3 9 5 4h14l2 5M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v7h14v-7',
   close: 'M6 6l12 12M18 6 6 18',
   home: 'M3 11 12 4l9 7M5 10v10h5v-6h4v6h5V10',
   user: 'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21a8 8 0 0 1 16 0',

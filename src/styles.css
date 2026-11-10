@@ -786,3 +786,30 @@ html, body { overflow-x: hidden; }
   .main-nav a { padding: 12px 8px; font-size: 15px; }
   .header-actions .btn { padding: 0 14px; font-size: 13px; }
 }
+
+/* Image picker */
+.picker-label { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+.picker-label span { color: var(--muted-2); font-size: 12px; margin-left: 6px; }
+.picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.picker-item { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-2); background: #0d0c11; }
+.picker-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.picker-item button { position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; border-radius: 50%; border: 0; background: rgba(0,0,0,0.7); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.picker-add { aspect-ratio: 4 / 3; border-radius: 12px; border: 1.5px dashed #5b3577; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font-size: 13px; min-height: 90px; }
+.picker-add:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Business center */
+.biz-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.biz-list { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr)); }
+.biz-card { display: flex; flex-direction: column; }
+.biz-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.biz-head h2 { margin: 0; font-size: 20px; }
+.biz-head p { margin: 4px 0 0; font-size: 13px; color: var(--muted-2); }
+.biz-sub { margin: 20px 0 10px; font-size: 15px; }
+.biz-empty { margin: 0; font-size: 13px; color: var(--muted-2); }
+.biz-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.biz-photos figure { margin: 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-2); background: #0d0c11; }
+.biz-photos figure.is-revoked { opacity: 0.45; }
+.biz-photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.biz-photos figcaption { padding: 8px; display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+.biz-photos .badge { font-size: 11px; white-space: normal; }
+.biz-link { background: none; border: 0; color: #ff9cc4; font-size: 12px; cursor: pointer; padding: 6px 2px; min-height: 32px; }

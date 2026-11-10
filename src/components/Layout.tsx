@@ -41,6 +41,7 @@ export default function Layout() {
             <NavLink to="/resources">創作資源</NavLink>
             <NavLink to="/partners">品牌合作</NavLink>
             {session && <NavLink to="/account">會員中心</NavLink>}
+            {session && <NavLink to="/merchant">店家中心</NavLink>}
             {isAdmin && <NavLink to="/admin">管理後台</NavLink>}
             <div className="drawer-auth">
               {session ? (

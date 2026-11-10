@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { CATEGORY, CITIES, POWER, PRICE } from '../lib/labels'
 import { errorText, supabase } from '../lib/supabase'
+import ImagePicker from '../components/ImagePicker'
+import { uploadSpaceImage } from '../lib/upload'
 
 export const TERMS_VERSION = '2026-11-draft'
 
@@ -13,8 +15,7 @@ const empty = {
   large_tables: '', supports_events: '', event_capacity: '', group_friendly: '',
   no_time_limit: '', minimum_charge: '', has_restroom: '',
   applicant_name: '', applicant_position: '', applicant_email: '',
-  photo_url: '', logo_url: '',
-}
+  }
 
 const tri = (v: string) => (v === '' ? null : v === 'yes')
 
@@ -31,6 +32,9 @@ export default function ListYourSpace() {
   const [f, setF] = useState(empty)
   const [scope, setScope] = useState({ photos: false, logo: false, official_text: false })
   const [accepted, setAccepted] = useState(false)
+  const [photos, setPhotos] = useState<File[]>([])
+  const [logo, setLogo] = useState<File[]>([])
+  const [progress, setProgress] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
@@ -66,16 +70,24 @@ export default function ListYourSpace() {
       setError(errorText(error))
       return
     }
-    // Assets are stored as pending; an admin must grant permission before any public use.
-    const assets: [string, string, boolean][] = [['photo', f.photo_url, scope.photos], ['logo', f.logo_url, scope.logo]]
-    for (const [type, url, allowed] of assets) {
-      if (url && allowed) {
-        const { error: aErr } = await supabase.rpc('add_space_asset', {
-          p_space_id: spaceId, p_asset_type: type, p_asset_url: url, p_scope: 'DDF 目錄刊登頁面',
-        })
-        if (aErr) setError(`申請已送出，但素材未能加入：${errorText(aErr)}`)
+    // Upload chosen images; each is stored as pending until an admin grants it.
+    const uploads: [string, File][] = [
+      ...(scope.photos ? photos.map((f) => ['photo', f] as [string, File]) : []),
+      ...(scope.logo ? logo.map((f) => ['logo', f] as [string, File]) : []),
+    ]
+    const failed: string[] = []
+    for (const [i, [type, file]] of uploads.entries()) {
+      setProgress(`上傳圖片 ${i + 1}/${uploads.length}…`)
+      try {
+        const url = await uploadSpaceImage(file, session!.user.id, spaceId as string)
+        const { error: aErr } = await supabase.rpc('add_space_asset', { p_space_id: spaceId, p_asset_type: type, p_asset_url: url, p_scope: 'DDF 目錄刊登頁面' })
+        if (aErr) throw aErr
+      } catch {
+        failed.push(file.name)
       }
     }
+    setProgress('')
+    if (failed.length) setError(`申請已送出，但這些圖片未能上傳：${failed.join('、')}。可稍後在「店家中心」補上。`)
     setBusy(false)
     setDone(true)
   }
@@ -98,7 +110,7 @@ export default function ListYourSpace() {
 
       {done && (
         <div className="notice notice-ok" role="status">
-          已收到你的申請。DDF 會以 Email 與你確認身份與授權資格，審核通過並核對資料後才會公開。你可以在 <Link to="/my-spaces">我的刊登</Link> 查看進度。
+          已收到你的申請。DDF 會以 Email 與你確認身份與授權資格，審核通過並核對資料後才會公開。你可以在 <Link to="/merchant">店家中心</Link> 查看進度。
         </div>
       )}
 
@@ -173,9 +185,9 @@ export default function ListYourSpace() {
             </p>
             <label className="check"><input type="checkbox" checked disabled /> 店家資料刊登授權（名稱、地址、類別、營業時間、價格、設備與座位資訊）</label>
             <label className="check"><input type="checkbox" checked={scope.photos} onChange={(e) => setScope({ ...scope, photos: e.target.checked })} /> 照片使用授權</label>
-            {scope.photos && <label className="field">店家照片網址<input type="url" pattern="https://.*" placeholder="https://" value={f.photo_url} onChange={upd('photo_url')} /><span className="hint">目前以圖片網址提交；檔案上傳功能將於設定 Supabase Storage 後開放。</span></label>}
+            {scope.photos && <ImagePicker label="店家照片" max={3} files={photos} onChange={setPhotos} />}
             <label className="check"><input type="checkbox" checked={scope.logo} onChange={(e) => setScope({ ...scope, logo: e.target.checked })} /> Logo 使用授權</label>
-            {scope.logo && <label className="field">品牌 Logo 網址<input type="url" pattern="https://.*" placeholder="https://" value={f.logo_url} onChange={upd('logo_url')} /></label>}
+            {scope.logo && <ImagePicker label="品牌 Logo" max={1} files={logo} onChange={setLogo} />}
             <label className="check"><input type="checkbox" checked={scope.official_text} onChange={(e) => setScope({ ...scope, official_text: e.target.checked })} /> 官方文字介紹使用授權</label>
           </fieldset>
 
@@ -192,7 +204,7 @@ export default function ListYourSpace() {
 
           {error && <p className="notice notice-error" role="alert">{error}</p>}
           <button className="btn btn-primary" type="submit" disabled={busy || !accepted} style={{ justifySelf: 'start', minHeight: 50, padding: '0 28px' }}>
-            {busy ? '送出中…' : '送出刊登申請'}
+            {busy ? progress || '送出中…' : '送出刊登申請'}
           </button>
         </form>
       )}

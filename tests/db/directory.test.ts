@@ -466,6 +466,28 @@ describe('我的評價後台', () => {
   })
 })
 
+describe('店家照片上傳', () => {
+  it('limits a listing to 3 photos and 1 logo; withdrawn photos free a slot', async () => {
+    const id = await submit(MERCHANT_A)
+    const add = (type: string, n: number) => as<{ a: string }>(MERCHANT_A, `select public.add_space_asset($1, $2, $3, 'listing') as a`, [id, type, `https://example.com/${type}${n}.jpg`])
+    const [{ a: first }] = await add('photo', 1)
+    await add('photo', 2)
+    await add('photo', 3)
+    await expect(add('photo', 4)).rejects.toThrow(/at most 3 photos/)
+    await add('logo', 1)
+    await expect(add('logo', 2)).rejects.toThrow(/only 1 logo/)
+    await as(MERCHANT_A, `select public.merchant_remove_asset($1)`, [first])
+    await add('photo', 5)
+    await expect(as(MERCHANT_B, `select public.merchant_remove_asset($1)`, [first])).rejects.toThrow(/not the manager/)
+  })
+
+  it('members can only upload into their own storage folder', async () => {
+    await as(MERCHANT_A, `insert into storage.objects (bucket_id, name) values ('space-assets', $1)`, [`${MERCHANT_A}/s1/a.jpg`])
+    await expect(as(MERCHANT_A, `insert into storage.objects (bucket_id, name) values ('space-assets', $1)`, [`${MERCHANT_B}/s1/a.jpg`])).rejects.toThrow(/row-level security/)
+    await expect(as('anon', `insert into storage.objects (bucket_id, name) values ('space-assets', 'x/a.jpg')`)).rejects.toThrow(/row-level security/)
+  })
+})
+
 describe('DEMO data and account deletion', () => {
   it('DEMO rows never appear publicly and cannot be published', async () => {
     const id = await publishFully(MERCHANT_A, 'DEMO 空間 A')
