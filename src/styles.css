@@ -1133,3 +1133,27 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: 0.01em; }
 input, select, textarea { transition: border-color .2s, box-shadow .2s; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--gold) !important; box-shadow: 0 0 0 3px rgba(231,194,122,0.18); }
 .mg-panel.mg-chat { padding: 0; overflow: hidden; border-color: var(--hair-2); }
+
+/* Footer v2: four aligned columns */
+.site-footer { padding: 64px 0 28px; }
+.site-footer .ft { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)); gap: 40px; align-items: start; }
+.ft-brand img { height: 76px; width: auto; display: block; }
+.ft-tag { margin: 16px 0 0; font-size: 14px; line-height: 1.6; color: #e9e4f1; letter-spacing: .02em; }
+.ft-note { margin: 14px 0 0; max-width: 360px; font-size: 12px; line-height: 1.8; color: var(--muted-2); }
+.ft-col { display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
+.ft-h { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .24em; color: var(--gold); }
+.ft-bottom { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--hair); }
+.ft-bottom p { margin: 0; font-size: 12px; color: var(--muted-2); letter-spacing: .02em; }
+.ft-bottom .ft-made { color: var(--gold); letter-spacing: .08em; }
+@media (max-width: 960px) { .site-footer .ft { grid-template-columns: repeat(3, minmax(0, 1fr)); } .ft-brand { grid-column: 1 / -1; } }
+@media (max-width: 560px) {
+  .site-footer { padding: 44px 0 96px; }
+  .site-footer .ft { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 20px; }
+  .ft-col:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+  .ft-col:last-child .ft-h { grid-column: 1 / -1; }
+  .ft-bottom { flex-direction: column; margin-top: 32px; }
+}
+.site-footer nav.ft-col { display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
+@media (max-width: 560px) {
+  .site-footer nav.ft-col:last-child { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+}

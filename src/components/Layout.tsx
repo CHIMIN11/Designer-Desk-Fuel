@@ -83,25 +83,40 @@ export default function Layout() {
       {!['/contact', '/login', '/reset-password', '/lounge'].includes(pathname) && <JoinCTA />}
 
       <footer className="site-footer">
-        <div className="container row">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <img src={asset('/logo-full.png')} alt="DDF Designer Desk Fuel" style={{ height: 80, width: 'auto' }} />
-            <span style={{ fontSize: 13, color: 'var(--muted-2)' }}>Find Your Space.<br />Fuel Your Magic.</span>
+        <div className="container ft">
+          <div className="ft-brand">
+            <img src={asset('/logo-full.png')} alt="DDF Designer Desk Fuel" />
+            <p className="ft-tag">Find Your Space.<br />Fuel Your Magic.</p>
+            <p className="ft-note">DDF 為工作空間資訊目錄。刊登資訊由店家授權提供並經 DDF 核對，不代表 DDF 推薦、認證、背書或品質保證。</p>
           </div>
-          <nav aria-label="法律與政策">
+          <nav className="ft-col" aria-label="探索">
+            <p className="ft-h">探索</p>
+            <Link to="/spaces">探索空間</Link>
+            <Link to="/spaces?events=1">活動與講座</Link>
+            <Link to="/map">魔法師地圖</Link>
+            <Link to="/community">設計師社群</Link>
+            <Link to="/about">關於 DDF</Link>
+          </nav>
+          <nav className="ft-col" aria-label="合作">
+            <p className="ft-h">合作</p>
             <Link to="/contact">聯絡我們・合作方案</Link>
+            <Link to="/list-your-space">店家申請刊登</Link>
+            <Link to="/partners">品牌合作</Link>
+            <Link to="/listing-terms">店家刊登授權條款</Link>
+            <Link to="/asset-guidelines">素材使用規範</Link>
+          </nav>
+          <nav className="ft-col" aria-label="條款與隱私">
+            <p className="ft-h">條款與隱私</p>
             <Link to="/privacy-policy">隱私權政策</Link>
             <Link to="/terms-of-service">服務條款</Link>
             <Link to="/community-guidelines">社群守則</Link>
             <Link to="/cookie-policy">Cookie 政策</Link>
             <Link to="/data-request">個資申請</Link>
-            <Link to="/listing-terms">店家刊登授權條款</Link>
-            <Link to="/asset-guidelines">素材使用規範</Link>
           </nav>
-          <p className="disclaimer">
-            DDF 為工作空間資訊目錄。刊登資訊由店家授權提供並經 DDF 核對，不代表 DDF 推薦、認證、背書或品質保證。
-          </p>
-          <p className="copyright">© {new Date().getFullYear()} Designer Desk Fuel（DDF）. All rights reserved.<span>Made in Taiwan for designers ✦</span></p>
+        </div>
+        <div className="container ft-bottom">
+          <p>© {new Date().getFullYear()} Designer Desk Fuel（DDF）. All rights reserved.</p>
+          <p className="ft-made">Made in Taiwan for designers ✦</p>
         </div>
       </footer>
     </>
