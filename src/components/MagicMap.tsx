@@ -50,8 +50,8 @@ export default function MagicMap({ className = '' }: { className?: string }) {
     <svg className={`magic-map ${className}`} viewBox={`0 0 ${MAP_W} ${MAP_H}`} role="img" aria-label="DDF 魔法師地圖（示意插畫）：臺北市、新北市、桃園市、基隆市">
       <defs>
         <radialGradient id="mmCore" cx="50%" cy="45%" r="60%">
-          <stop offset="0" stopColor="#a54ad8" stopOpacity="0.55" />
-          <stop offset="0.6" stopColor="#5a1f86" stopOpacity="0.35" />
+          <stop offset="0" stopColor="#8a5bc4" stopOpacity="0.42" />
+          <stop offset="0.6" stopColor="#3d2368" stopOpacity="0.32" />
           <stop offset="1" stopColor="#2c0f45" stopOpacity="0.1" />
         </radialGradient>
         <linearGradient id="mmGold" x1="0" y1="0" x2="1" y2="1">
@@ -67,8 +67,8 @@ export default function MagicMap({ className = '' }: { className?: string }) {
       </defs>
 
       {/* aura */}
-      <g filter="url(#mmGlow)" opacity="0.6">
-        {CITIES.map((c) => <circle key={c.key} cx={c.cx} cy={c.cy} r={c.r * 0.9} fill="#8b3fc8" />)}
+      <g filter="url(#mmGlow)" opacity="0.45">
+        {CITIES.map((c) => <circle key={c.key} cx={c.cx} cy={c.cy} r={c.r * 0.9} fill="#5b3a8f" />)}
       </g>
 
       {/* ley lines */}

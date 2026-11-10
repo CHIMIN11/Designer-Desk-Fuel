@@ -1185,3 +1185,43 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 60; pointer-event
 .join-head h2 span { background: linear-gradient(90deg, #f6e7c4, #d9bc84 55%, #e7a3c0); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .join-card:nth-child(3) .c, .join-card:hover .c { background: var(--pink-grad); }
 .mg-partners a, .ig-chip { border-color: var(--hair-2) !important; }
+
+/* Home panels — premium pass */
+.mg-panels { gap: 24px; padding-top: 40px; }
+.mg-panel { padding: 36px; }
+.mg-vision h2 { font-size: 26px; line-height: 1.5; }
+.mg-map { background: radial-gradient(520px 320px at 50% 55%, rgba(80,50,130,0.22), transparent 70%), var(--surface); }
+.mg-map-head { justify-content: space-between; align-items: flex-start; }
+.mg-map-head h2 { font-size: 26px; letter-spacing: .04em; }
+.mg-map-head p { color: var(--muted); }
+.mg-map-head > svg { opacity: .8; flex: 0 0 auto; }
+.mg-legend { border-color: var(--hair-2); background: transparent; color: #d9d3e3; }
+.mg-map-cta { margin-top: auto; padding-top: 0; }
+.mg-map-body { margin: 12px 0 20px; }
+.btn-gold { background: transparent !important; color: var(--champagne) !important; border: 1px solid rgba(217,188,132,0.6) !important; box-shadow: none !important; }
+.btn-gold:hover { background: rgba(217,188,132,0.1) !important; color: #fff !important; }
+
+/* Chat: dark glass instead of white window */
+.mg-chat { background: linear-gradient(180deg, rgba(26,20,36,0.9), rgba(14,11,20,0.95)); color: var(--text); border: 1px solid var(--hair-2) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.45) !important; backdrop-filter: blur(12px); }
+.mg-chat-bar { background: transparent; border-bottom: 1px solid var(--hair); padding: 14px 18px; }
+.mg-chat-bar b { display: flex; align-items: baseline; gap: 8px; font-family: 'Noto Serif TC', serif; font-size: 17px; letter-spacing: .02em; }
+.mg-chat-bar b small { font-family: 'Inter', 'Noto Sans TC', sans-serif; font-weight: 400; font-size: 12px; color: var(--muted-2); }
+.mg-chat-bar .win { margin: 0 6px 0 0; gap: 6px; }
+.mg-chat-bar .win i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.16); }
+.mg-chat-live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .16em; color: var(--champagne); border: 1px solid rgba(217,188,132,0.45); border-radius: 999px; padding: 3px 9px; }
+.mg-chat-live i { width: 6px; height: 6px; border-radius: 50%; background: #6fd59a; box-shadow: 0 0 8px #6fd59a; }
+.mg-chat-body nav { background: transparent; border-right: 1px solid var(--hair); padding: 14px 10px; }
+.mg-chat-body nav .h { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--gold); font-weight: 600; padding: 2px 10px 8px; }
+.mg-chat-body nav a { color: #cfc9d9; font-size: 13.5px; position: relative; }
+.mg-chat-body nav a:hover { color: #fff; background: rgba(255,255,255,0.04); }
+.mg-chat-body nav a.on { background: rgba(217,188,132,0.1); color: #fff; font-weight: 600; }
+.mg-chat-body nav a.on::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--gold); }
+.mg-chat-body .msgs { background: transparent; padding: 16px; gap: 14px; }
+.mg-chat-body .av { background: linear-gradient(135deg, #3a2a52, #6b3a6e); border: 1px solid rgba(217,188,132,0.35); color: var(--champagne); font-weight: 600; }
+.mg-chat-body .who { color: var(--muted-2); }
+.mg-chat-body .who b { color: #fff; font-weight: 600; margin-right: 4px; }
+.mg-chat-body .txt { background: rgba(255,255,255,0.05); border: 1px solid var(--hair); color: #ece8f2; }
+.mg-chat-input { background: rgba(255,255,255,0.03); border-color: var(--hair-2); color: var(--muted-2); }
+.mg-chat-input:hover { border-color: rgba(217,188,132,0.5); color: var(--champagne); }
+@media (max-width: 760px) { .mg-panel { padding: 24px 20px; } .mg-chat { padding: 0; } .mg-chat-body nav { border-right: 0; border-bottom: 1px solid var(--hair); } }
+@media (max-width: 760px) { .mg-chat-body nav a.on::before { display: none; } .mg-chat-body nav a.on { border-color: rgba(217,188,132,0.6); } }

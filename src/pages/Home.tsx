@@ -206,11 +206,12 @@ export default function Home() {
 
         <article className="mg-panel mg-map">
           <div className="mg-map-head">
-            <Icon name="compass" size={44} stroke={1} color="#e7c27a" />
             <div>
-              <h2 className="serif">魔法師地圖 <small>Designer Map</small></h2>
+              <p className="sec-kicker">Designer Map</p>
+              <h2 className="serif">魔法師地圖</h2>
               <p>發現附近的設計師、工作空間與活動</p>
             </div>
+            <Icon name="compass" size={36} stroke={1} color="#d9bc84" />
           </div>
           <div className="mg-map-body">
             <MagicMap className="mg-map-svg" />
@@ -226,14 +227,13 @@ export default function Home() {
 
         <article className="mg-panel mg-chat" aria-label="DDF 即時聊天室">
           <div className="mg-chat-bar">
-            <Icon name="chat" size={18} color="#ffb4e0" />
-            <b>DDF 即時聊天室</b>
-            {SHOW_DEMO ? <DemoTag /> : <span className="badge badge-muted">會員限定</span>}
             <span className="win" aria-hidden="true"><i /><i /><i /></span>
+            <b>DDF Lounge<small>即時聊天室</small></b>
+            <span className="mg-chat-live"><i />{SHOW_DEMO ? 'DEMO' : '會員限定'}</span>
           </div>
           <div className="mg-chat-body">
             <nav aria-label="聊天室頻道">
-              <span className="h">聊天室</span>
+              <span className="h">Channels</span>
               {['General Lounge', 'Workspace', 'Design Talk', 'AI & Technology', 'Collaboration', 'Events'].map((c, i) => (
                 <Link key={c} to={`/lounge?c=${c.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`} className={i === 0 ? 'on' : ''}># {c}</Link>
               ))}
