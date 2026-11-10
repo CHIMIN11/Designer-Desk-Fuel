@@ -22,17 +22,53 @@ export function Reviews() {
   )
 }
 
+type Designer = { id: string; username: string | null; display_name: string; profession: string | null; bio: string | null; location: string | null; skills: string[]; portfolio_url: string | null; avatar_url: string | null }
+
 export function Community() {
+  const [q, setQ] = useState('')
+  const [rows, setRows] = useState<Designer[] | null>(null)
+  useEffect(() => {
+    if (!supabase) return
+    const t = setTimeout(() => {
+      supabase!.rpc('list_designers', { p_search: q || null, p_limit: 60 }).then(({ data }) => setRows((data ?? []) as Designer[]))
+    }, 250)
+    return () => clearTimeout(t)
+  }, [q])
+
   return (
     <div className="container page">
-      <h1>社群活動</h1>
-      <p className="lead">設計師聚會、講座、工作坊與作品發表。活動報名功能籌備中。</p>
+      <p className="ab-kicker">Designer Community</p>
+      <h1>設計師社群</h1>
+      <p className="lead">認識同頻的設計師。這裡只顯示選擇公開個人資料的會員；想加入名單，到 <Link to="/account">會員中心</Link> 把公開程度設為「公開」。</p>
+      <div className="filters">
+        <label className="field" style={{ flex: '1 1 320px' }}>搜尋設計師（名稱、職業、地區、技能）
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="例：插畫、台北、Figma" />
+        </label>
+      </div>
+      {!supabase && <p className="notice notice-warn">尚未連接 Supabase。</p>}
+      {rows && rows.length === 0 && <div className="card">{q ? '沒有符合的設計師。' : '還沒有設計師公開個人資料，成為第一位吧！'} <Link to="/account">編輯我的個人資料 →</Link></div>}
+      {rows && rows.length > 0 && (
+        <div className="grid-cards">
+          {rows.map((d) => (
+            <article key={d.id} className="card designer-card">
+              <div className="designer-head">
+                {d.avatar_url ? <img src={d.avatar_url} alt="" /> : <span className="designer-av" aria-hidden="true">{d.display_name.slice(0, 1)}</span>}
+                <div>
+                  <h2>{d.display_name}</h2>
+                  <p>{[d.profession, d.location].filter(Boolean).join(' · ') || '設計師'}</p>
+                </div>
+              </div>
+              {d.bio && <p className="designer-bio">{d.bio}</p>}
+              {d.skills.length > 0 && <p className="review-tags">{d.skills.map((s) => <span key={s} className="badge badge-muted">{s}</span>)}</p>}
+              {d.portfolio_url && <a href={d.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-link">作品集 <Icon name="arrow" size={14} stroke={2} /></a>}
+            </article>
+          ))}
+        </div>
+      )}
+      <h2 style={{ fontSize: 22, margin: '48px 0 14px' }}>聚會與活動</h2>
       <div className="grid-cards">
-        <div className="card"><Icon name="users" size={30} color="#ff4f9a" /><h2 style={{ fontSize: 19 }}>設計師聚會</h2><p style={{ color: 'var(--muted)' }}>想找能接待團體的空間？</p><Link to="/spaces?group=1">找聚會場地 →</Link></div>
-        <div className="card"><Icon name="calendar" size={30} color="#ff4f9a" /><h2 style={{ fontSize: 19 }}>講座／工作坊</h2><p style={{ color: 'var(--muted)' }}>依容納人數找可租借的活動場地。</p><Link to="/venues">找活動場地 →</Link></div>
-        <div className="card"><Icon name="instagram" size={30} color="#ff4f9a" /><h2 style={{ fontSize: 19 }}>追蹤活動消息</h2><p style={{ color: 'var(--muted)' }}>最新活動會先在合作夥伴社群公告。</p>
-          <a href="https://www.instagram.com/socialdesignlab_/" target="_blank" rel="noopener noreferrer">@socialdesignlab_</a>
-          <a href="https://www.instagram.com/pptnight.tw/" target="_blank" rel="noopener noreferrer">@pptnight.tw</a></div>
+        <div className="card"><Icon name="users" size={30} color="#ff4f9a" /><h3 style={{ fontSize: 18 }}>設計師聚會</h3><p style={{ color: 'var(--muted)' }}>想找能接待團體的空間？</p><Link to="/spaces?group=1">找聚會場地 →</Link></div>
+        <div className="card"><Icon name="calendar" size={30} color="#ff4f9a" /><h3 style={{ fontSize: 18 }}>講座／工作坊</h3><p style={{ color: 'var(--muted)' }}>依容納人數找可租借的活動場地。</p><Link to="/venues">找活動場地 →</Link></div>
       </div>
     </div>
   )

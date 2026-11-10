@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import { AUTH_STATUS, CATEGORY, PUB_STATUS, formatDate } from '../../lib/labels'
 import { errorText, supabase } from '../../lib/supabase'
+import { AdminCreateSpace, AdminEditSpace } from './AdminSpaceForms'
+import AdminMembers from './AdminMembers'
 
 type Space = {
   id: string; business_name: string; address: string; city: string; district: string | null; category: string
@@ -22,10 +24,12 @@ type Audit = { id: number; actor_id: string | null; actor_role: string; action: 
 
 const TABS = [
   ['applications', '申請審核'],
+  ['create', '新增空間'],
   ['publication', '上架管理'],
   ['assets', '素材授權'],
   ['updates', '資料更新'],
   ['reviews', '評價管理'],
+  ['members', '會員管理'],
   ['audit', '稽核紀錄'],
 ] as const
 type Tab = (typeof TABS)[number][0]
@@ -41,6 +45,7 @@ export default function Admin() {
   const [updates, setUpdates] = useState<UpdateReq[]>([])
   const [audit, setAudit] = useState<Audit[]>([])
   const [reviews, setReviews] = useState<Review[]>([])
+  const [editSpace, setEditSpace] = useState<Record<string, unknown> | null>(null)
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
 
   const load = useCallback(async () => {
@@ -149,6 +154,14 @@ export default function Admin() {
         </div>
       )}
 
+      {tab === 'create' && <AdminCreateSpace onDone={load} />}
+
+      {tab === 'members' && <AdminMembers />}
+
+      {tab === 'publication' && editSpace && (
+        <AdminEditSpace row={editSpace} onClose={(changed) => { setEditSpace(null); if (changed) { setMsg({ kind: 'ok', text: '已更新空間資料並寫入稽核紀錄。' }); load() } }} />
+      )}
+
       {tab === 'publication' && (
         <div className="table-wrap">
           <table>
@@ -161,6 +174,7 @@ export default function Admin() {
                   <td>{PUB_STATUS[s.publication_status]}</td>
                   <td>{formatDate(s.last_verified_at)}<br />{formatDate(s.next_review_at)}</td>
                   <td className="actions">
+                    <button className="btn btn-ghost" type="button" onClick={() => { setEditSpace(s as unknown as Record<string, unknown>); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>編輯</button>
                     <button className="btn btn-ghost" type="button" onClick={() => {
                       const note = ask('核對說明（例如：已與官方網站核對地址與營業時間）')
                       if (note) call('admin_verify_space', { p_space_id: s.id, p_next_review_at: null, p_note: note }, '已記錄資料核對，180 天後需複查。')

@@ -384,6 +384,88 @@ describe('設計師真實評價', () => {
   })
 })
 
+describe('設計師個人資料', () => {
+  it('profiles are private by default and only public/members ones are listed', async () => {
+    expect(await as('anon', 'select * from public.list_designers()')).toHaveLength(0)
+    await as(MEMBER, `update public.profiles set profession = 'UI 設計師', skills = '{Figma,UI}', profile_visibility = 'public' where id = $1`, [MEMBER])
+    const rows = await as<Record<string, unknown>>('anon', 'select * from public.list_designers()')
+    expect(rows.map((r) => r.display_name)).toEqual(['Miko'])
+    expect(JSON.stringify(rows)).not.toContain('@')
+    await as(MEMBER, `update public.profiles set profile_visibility = 'members' where id = $1`, [MEMBER])
+    expect(await as('anon', 'select * from public.list_designers()')).toHaveLength(0)
+    expect(await as(MERCHANT_A, 'select * from public.list_designers()')).toHaveLength(1)
+    expect(await as('anon', `select * from public.list_designers('figma')`)).toHaveLength(0)
+    expect(await as(MERCHANT_A, `select * from public.list_designers('figma')`)).toHaveLength(1)
+  })
+
+  it('members cannot edit other profiles or protected columns', async () => {
+    const r = await as(MERCHANT_A, `update public.profiles set bio = 'hacked' where id = $1 returning id`, [MEMBER])
+    expect(r).toHaveLength(0)
+    await expect(as(MEMBER, `update public.profiles set created_at = now() where id = $1`, [MEMBER])).rejects.toThrow(/permission denied/)
+  })
+
+  it('admins can read and edit profiles, with an audit record', async () => {
+    expect((await as(ADMIN, 'select id from public.profiles')).length).toBeGreaterThanOrEqual(1)
+    await as(ADMIN, `select public.admin_update_profile($1, '{"bio":"已更正"}', '使用者回報')`, [MEMBER])
+    const [p] = await as<{ bio: string }>('superuser', 'select bio from public.profiles where id = $1', [MEMBER])
+    expect(p.bio).toBe('已更正')
+    const log = await as<{ action: string }>(ADMIN, `select action from public.admin_audit_log where target_id = $1`, [MEMBER])
+    expect(log.map((l) => l.action)).toContain('profile_updated')
+    await expect(as(MEMBER, `select public.admin_update_profile($1, '{"bio":"x"}', 'x')`, [MEMBER])).rejects.toThrow(/admin only/)
+  })
+})
+
+describe('管理員建立與編輯空間', () => {
+  it('admin-created space with evidence is approved, still needs verification to publish', async () => {
+    const [{ id }] = await as<{ id: string }>(ADMIN, `select public.admin_create_space($1, $2, $3) as id`, [
+      JSON.stringify(space('Admin Entered')),
+      JSON.stringify({ applicant_name: '店長', applicant_position: '店長', applicant_email: 'o@example.com', evidence_reference: 'Email 2026-11-10', expires_at: new Date(Date.now() + 864e5 * 365).toISOString(), scope: { photos: true } }),
+      'a@example.com',
+    ])
+    const [s] = await as<{ authorization_status: string; owner_id: string }>('superuser', 'select authorization_status, owner_id from public.spaces where id = $1', [id])
+    expect(s).toEqual({ authorization_status: 'approved', owner_id: MERCHANT_A })
+    expect(await publicIds()).not.toContain(id)
+    await as(ADMIN, `select public.admin_verify_space($1, null, 'ok')`, [id])
+    await as(ADMIN, `select public.admin_set_publication($1, 'published', null)`, [id])
+    expect(await publicIds()).toContain(id)
+    // the assigned business account can now manage it
+    expect(await as(MERCHANT_A, 'select id from public.spaces where id = $1', [id])).toHaveLength(1)
+  })
+
+  it('without evidence it stays pending; members cannot create or edit', async () => {
+    const [{ id }] = await as<{ id: string }>(ADMIN, `select public.admin_create_space($1, $2, null) as id`, [
+      JSON.stringify(space('No Evidence')),
+      JSON.stringify({ applicant_name: 'x', applicant_position: 'x', applicant_email: 'o@example.com' }),
+    ])
+    const [s] = await as<{ authorization_status: string }>('superuser', 'select authorization_status from public.spaces where id = $1', [id])
+    expect(s.authorization_status).toBe('pending')
+    await expect(as(MEMBER, `select public.admin_create_space('{}', '{}', null)`)).rejects.toThrow(/admin only/)
+    await expect(as(MERCHANT_A, `select public.admin_update_space($1, '{"opening_hours":"x"}', 'x')`, [id])).rejects.toThrow(/admin only/)
+  })
+
+  it('admin edits are applied, logged per field and audited', async () => {
+    const id = await publishFully()
+    await as(ADMIN, `select public.admin_update_space($1, '{"opening_hours":"12:00-22:00","minimum_charge":200}', '店家來信更新')`, [id])
+    const [row] = await as<{ opening_hours: string; minimum_charge: number }>('anon', 'select opening_hours, minimum_charge from public.list_public_spaces() where id = $1', [id])
+    expect(row).toEqual({ opening_hours: '12:00-22:00', minimum_charge: 200 })
+    const logs = await as<{ field_name: string; update_source: string }>(ADMIN, `select field_name, update_source from public.space_update_logs where space_id = $1 and field_name = 'opening_hours'`, [id])
+    expect(logs[0].update_source).toBe('admin')
+    await expect(as(ADMIN, `select public.admin_update_space($1, '{"publication_status":"published"}', 'x')`, [id])).rejects.toThrow(/cannot be changed/)
+  })
+})
+
+describe('我的評價後台', () => {
+  it('lists only my own reviews, with the space name', async () => {
+    const id = await publishFully()
+    await as(MEMBER, `insert into public.space_reviews (space_id, author_id, body) values ($1, $2, '插座很多，適合一個人久坐工作。')`, [id, MEMBER])
+    const mine = await as<{ business_name: string; space_public: boolean }>(MEMBER, 'select * from public.list_my_reviews()')
+    expect(mine).toHaveLength(1)
+    expect(mine[0].business_name).toBe('Studio One')
+    expect(mine[0].space_public).toBe(true)
+    expect(await as(MERCHANT_B, 'select * from public.list_my_reviews()')).toHaveLength(0)
+  })
+})
+
 describe('DEMO data and account deletion', () => {
   it('DEMO rows never appear publicly and cannot be published', async () => {
     const id = await publishFully(MERCHANT_A, 'DEMO 空間 A')

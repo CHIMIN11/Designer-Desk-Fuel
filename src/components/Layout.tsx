@@ -40,7 +40,7 @@ export default function Layout() {
             <NavLink to="/map">魔法師地圖</NavLink>
             <NavLink to="/resources">創作資源</NavLink>
             <NavLink to="/partners">品牌合作</NavLink>
-            {session && <NavLink to="/my-spaces">我的刊登</NavLink>}
+            {session && <NavLink to="/account">會員中心</NavLink>}
             {isAdmin && <NavLink to="/admin">管理後台</NavLink>}
             <div className="drawer-auth">
               {session ? (
@@ -76,7 +76,7 @@ export default function Layout() {
         <NavLink to="/spaces" end><Icon name="search" size={22} /><span>探索</span></NavLink>
         <NavLink to="/venues"><Icon name="calendar" size={22} /><span>活動</span></NavLink>
         <NavLink to="/reviews"><Icon name="chat" size={22} /><span>評價</span></NavLink>
-        <NavLink to={session ? '/my-spaces' : '/login'}><Icon name="user" size={22} /><span>{session ? '我的' : '登入'}</span></NavLink>
+        <NavLink to={session ? '/account' : '/login'}><Icon name="user" size={22} /><span>{session ? '我的' : '登入'}</span></NavLink>
       </nav>
 
       <footer className="site-footer">
