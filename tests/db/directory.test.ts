@@ -488,6 +488,70 @@ describe('店家照片上傳', () => {
   })
 })
 
+describe('Banner 管理', () => {
+  it('only admins manage banners; the public sees active, in-schedule ones', async () => {
+    const ins = `insert into public.site_banners (title, image_url, is_active, starts_at, ends_at) values ($1, 'https://example.com/b.jpg', $2, $3, $4)`
+    await expect(as(MEMBER, ins, ['x', true, null, null])).rejects.toThrow(/row-level security/)
+    await as(ADMIN, ins, ['現在', true, null, null])
+    await as(ADMIN, ins, ['停用', false, null, null])
+    await as(ADMIN, ins, ['未來', true, new Date(Date.now() + 864e5).toISOString(), null])
+    await as(ADMIN, ins, ['過期', true, null, new Date(Date.now() - 1000).toISOString()])
+    const rows = await as<{ title: string }>('anon', 'select title from public.list_active_banners()')
+    expect(rows.map((r) => r.title)).toEqual(['現在'])
+    await expect(as(MEMBER, `insert into storage.objects (bucket_id, name) values ('site-banners', 'a.jpg')`)).rejects.toThrow(/row-level security/)
+    await as(ADMIN, `insert into storage.objects (bucket_id, name) values ('site-banners', 'a.jpg')`)
+  })
+})
+
+describe('DDF Lounge 聊天室', () => {
+  const channel = async () => (await as<{ id: string }>('superuser', `select id from public.chat_channels where slug = 'general-lounge'`))[0].id
+  const send = (who: string, body: string, cid: string, sender = who) =>
+    as<{ id: string }>(who, `insert into public.chat_messages (channel_id, sender_id, body) values ($1, $2, $3) returning id`, [cid, sender, body])
+
+  it('only signed-in members read and post, and cannot forge the sender', async () => {
+    const cid = await channel()
+    await send(MEMBER, '大家好！', cid)
+    expect(await as(MERCHANT_A, 'select body from public.chat_messages')).toHaveLength(1)
+    await expect(as('anon', 'select * from public.chat_messages')).rejects.toThrow(/permission denied/)
+    await expect(as('anon', `insert into public.chat_messages (channel_id, sender_id, body) values ($1, $2, 'x')`, [cid, MEMBER])).rejects.toThrow(/permission denied/)
+    await expect(send(MERCHANT_A, '冒充別人', cid, MEMBER)).rejects.toThrow(/row-level security/)
+  })
+
+  it('limits message length, speed and duplicates', async () => {
+    const cid = await channel()
+    await expect(send(MEMBER, 'x'.repeat(501), cid)).rejects.toThrow(/check constraint/)
+    await send(MEMBER, '同一句話', cid)
+    await expect(send(MEMBER, '同一句話', cid)).rejects.toThrow(/duplicate message/)
+    for (const n of [1, 2, 3, 4]) await send(MEMBER, `訊息 ${n}`, cid)
+    await expect(send(MEMBER, '第六則', cid)).rejects.toThrow(/sending too fast/)
+  })
+
+  it('members delete only their own messages; admins delete any (audited) and see reports', async () => {
+    const cid = await channel()
+    const [{ id: mine }] = await send(MEMBER, '我的訊息', cid)
+    const [{ id: theirs }] = await send(MERCHANT_A, '別人的訊息', cid)
+    await expect(as(MEMBER, `select public.delete_chat_message($1)`, [theirs])).rejects.toThrow(/not allowed/)
+    await expect(as(MEMBER, `update public.chat_messages set body = 'x' where id = $1`, [theirs])).rejects.toThrow(/permission denied/)
+    await as(MEMBER, `select public.delete_chat_message($1)`, [mine])
+    expect((await as<{ id: string }>(MERCHANT_B, 'select id from public.chat_messages')).map((r) => r.id)).toEqual([theirs])
+
+    await as(MEMBER, `insert into public.chat_reports (message_id, reporter_id, report_type) values ($1, $2, 'spam')`, [theirs, MEMBER])
+    expect(await as(MERCHANT_B, 'select * from public.chat_reports')).toHaveLength(0)
+    expect(await as(ADMIN, 'select * from public.chat_reports')).toHaveLength(1)
+    await as(ADMIN, `select public.delete_chat_message($1, 'spam')`, [theirs])
+    const [r] = await as<{ status: string }>(ADMIN, 'select status from public.chat_reports')
+    expect(r.status).toBe('resolved')
+    expect((await as<{ action: string }>(ADMIN, `select action from public.admin_audit_log where target_id = $1`, [theirs])).map((a) => a.action)).toEqual(['chat_message_deleted'])
+  })
+
+  it('display names are for members only and never include email', async () => {
+    const rows = await as<Record<string, unknown>>(MERCHANT_A, 'select * from public.chat_display_names($1)', [[MEMBER]])
+    expect(rows[0].display_name).toBe('Miko')
+    expect(JSON.stringify(rows)).not.toContain('@')
+    await expect(as('anon', 'select * from public.chat_display_names($1)', [[MEMBER]])).rejects.toThrow(/permission denied/)
+  })
+})
+
 describe('DEMO data and account deletion', () => {
   it('DEMO rows never appear publicly and cannot be published', async () => {
     const id = await publishFully(MERCHANT_A, 'DEMO 空間 A')

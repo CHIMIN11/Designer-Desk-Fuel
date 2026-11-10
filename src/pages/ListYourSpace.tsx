@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth'
 import { CATEGORY, CITIES, POWER, PRICE } from '../lib/labels'
 import { errorText, supabase } from '../lib/supabase'
 import ImagePicker from '../components/ImagePicker'
+import ListingPreview from '../components/ListingPreview'
 import { uploadSpaceImage } from '../lib/upload'
 
 export const TERMS_VERSION = '2026-11-draft'
@@ -115,6 +116,7 @@ export default function ListYourSpace() {
       )}
 
       {supabase && session && !done && (
+        <div className="lys-layout">
         <form className="form" onSubmit={submit}>
           <fieldset>
             <legend>空間資訊</legend>
@@ -207,6 +209,10 @@ export default function ListYourSpace() {
             {busy ? progress || '送出中…' : '送出刊登申請'}
           </button>
         </form>
+        <aside className="lys-preview" aria-label="刊登示意">
+          <ListingPreview f={f} photos={scope.photos ? photos : []} logo={scope.logo ? logo : []} />
+        </aside>
+        </div>
       )}
     </div>
   )

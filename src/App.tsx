@@ -6,6 +6,7 @@ import Spaces from './pages/Spaces'
 import ListYourSpace from './pages/ListYourSpace'
 import MySpaces from './pages/MySpaces'
 import Account from './pages/Account'
+import Lounge from './pages/Lounge'
 import Login from './pages/Login'
 import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/admin/Admin'
@@ -26,7 +27,7 @@ export default function App() {
         <Route path="partners" element={<Partners />} />
         <Route path="map" element={<MapPage />} />
         <Route path="resources" element={<ComingSoon title="創作資源" en="Creative Resources" text="設計工具、素材與學習資源整理，籌備中。" to="/" cta="回首頁" />} />
-        <Route path="lounge" element={<ComingSoon title="DDF 即時聊天室" en="DDF Lounge" text="與在地設計師即時交流的會員聊天室，開發中。上線時將採會員登入、私訊僅參與者可讀、可檢舉與封鎖的安全設計。" to="/community" cta="看設計師社群" />} />
+        <Route path="lounge" element={<Lounge />} />
         <Route path="list-your-space" element={<ListYourSpace />} />
         <Route path="merchant" element={<MySpaces />} />
         <Route path="my-spaces" element={<Navigate to="/merchant" replace />} />

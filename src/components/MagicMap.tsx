@@ -16,10 +16,10 @@ const HOTSPOTS = ['台北市信義區', '台北市中山區', '新北市板橋�
 const PINS = ['台北市士林區', '新北市板橋區', '桃園市中壢區']
 
 const LABELS: { key: string; zh: string; en: string; dx: number; dy: number }[] = [
-  { key: '台北市', zh: '台北', en: 'Taipei', dx: 28, dy: -42 },
-  { key: '新北市', zh: '新北', en: 'New Taipei', dx: -6, dy: 58 },
-  { key: '桃園市', zh: '桃園', en: 'Taoyuan', dx: -40, dy: 40 },
-  { key: '基隆市', zh: '基隆', en: 'Keelung', dx: 18, dy: -20 },
+  { key: '台北市', zh: '臺北市', en: '', dx: 30, dy: -40 },
+  { key: '新北市', zh: '新北市', en: '', dx: -10, dy: 60 },
+  { key: '桃園市', zh: '桃園市', en: '', dx: -44, dy: 42 },
+  { key: '基隆市', zh: '基隆市', en: '', dx: 14, dy: -20 },
 ]
 
 const STARS: [number, number, number][] = [[60, 60, 9], [500, 300, 7], [450, 40, 6], [110, 330, 6], [250, 60, 5]]
@@ -32,7 +32,7 @@ function star(x: number, y: number, r: number) {
 export default function MagicMap({ className = '' }: { className?: string }) {
   const [tx, ty] = NODES['台北市信義區']
   return (
-    <svg className={`magic-map ${className}`} viewBox={`0 0 ${MAP_W} ${MAP_H}`} role="img" aria-label="魔法師地圖：台北、新北、桃園、基隆">
+    <svg className={`magic-map ${className}`} viewBox={`0 0 ${MAP_W} ${MAP_H}`} role="img" aria-label="魔法師地圖：臺北市、新北市、桃園市、基隆市">
       <defs>
         <radialGradient id="mmLand" cx="62%" cy="38%" r="75%">
           <stop offset="0" stopColor="#a54ad8" />
@@ -105,7 +105,7 @@ export default function MagicMap({ className = '' }: { className?: string }) {
         return (
           <g key={key} transform={`translate(${x + dx} ${y + dy})`} className="mm-label">
             <text className="zh">{zh}</text>
-            <text className="en" y="14">{en}</text>
+            {en && <text className="en" y="14">{en}</text>}
           </g>
         )
       })}

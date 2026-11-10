@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
 import MagicMap from '../components/MagicMap'
+import BannerCarousel, { type Banner } from '../components/BannerCarousel'
 import { ReviewItem, type PublicReview } from '../components/SpaceReviews'
 import type { PublicSpace } from './Spaces'
 import { CATEGORY, CITIES } from '../lib/labels'
@@ -57,10 +58,12 @@ export default function Home() {
   const [cond, setCond] = useState<Record<string, boolean>>({ power: true, wifi: true, nolimit: true })
   const [spaces, setSpaces] = useState<PublicSpace[]>([])
   const [reviews, setReviews] = useState<PublicReview[]>([])
+  const [banners, setBanners] = useState<Banner[]>([])
 
   useEffect(() => {
     if (!supabase) return
     supabase.rpc('list_public_spaces', {}).then(({ data }) => setSpaces(((data ?? []) as PublicSpace[]).slice(0, 4)))
+    supabase.rpc('list_active_banners').then(({ data }) => setBanners((data ?? []) as Banner[]))
     supabase.rpc('list_public_reviews', { p_space_id: null, p_limit: 3 }).then(({ data }) => setReviews((data ?? []) as PublicReview[]))
   }, [])
 
@@ -79,7 +82,8 @@ export default function Home() {
 
   return (
     <>
-      {/* HERO */}
+      {/* HERO + BANNERS */}
+      <BannerCarousel banners={banners}>
       <section className="mg-hero">
         <div className="mg-hero-media">
           <img src={asset('/hero.jpg')} alt="設計師在夜晚的工作據點用筆電與繪圖板創作" />
@@ -126,6 +130,7 @@ export default function Home() {
           </ul>
         </div>
       </section>
+      </BannerCarousel>
 
       {/* SEARCH */}
       <section className="mg-search" aria-label="搜尋工作空間">
@@ -217,21 +222,20 @@ export default function Home() {
             </ul>
           </div>
           <Link to="/map" className="btn btn-gold mg-map-cta">開啟魔法師地圖 →</Link>
-          <p className="mm-credit">圖資：內政部（政府資料開放授權條款）· 星座連線為示意</p>
         </article>
 
         <article className="mg-panel mg-chat" aria-label="DDF 即時聊天室">
           <div className="mg-chat-bar">
             <Icon name="chat" size={18} color="#ffb4e0" />
             <b>DDF 即時聊天室</b>
-            {SHOW_DEMO ? <DemoTag /> : <span className="badge badge-muted">即將推出</span>}
+            {SHOW_DEMO ? <DemoTag /> : <span className="badge badge-muted">會員限定</span>}
             <span className="win" aria-hidden="true"><i /><i /><i /></span>
           </div>
           <div className="mg-chat-body">
             <nav aria-label="聊天室頻道">
               <span className="h">聊天室</span>
               {['General Lounge', 'Workspace', 'Design Talk', 'AI & Technology', 'Collaboration', 'Events'].map((c, i) => (
-                <Link key={c} to="/lounge" className={i === 0 ? 'on' : ''}># {c}</Link>
+                <Link key={c} to={`/lounge?c=${c.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`} className={i === 0 ? 'on' : ''}># {c}</Link>
               ))}
             </nav>
             <div className="msgs">
@@ -240,8 +244,8 @@ export default function Home() {
                   <span className="av" aria-hidden="true">{m.who[0]}</span>
                   <div><p className="who"><b>{m.who}</b> {m.time}</p><p className="txt">{m.text}</p></div>
                 </div>
-              )) : <p className="txt">會員聊天室開發中，上線後會在這裡顯示最新討論。</p>}
-              <Link to="/lounge" className="mg-chat-input">輸入訊息…（即將推出）</Link>
+              )) : <p className="txt">會員專屬即時聊天室：認識設計師、交流工作空間與活動資訊。</p>}
+              <Link to="/lounge" className="mg-chat-input">登入後加入聊天 →</Link>
             </div>
           </div>
         </article>
@@ -317,7 +321,6 @@ export default function Home() {
           {PARTNERS.map((p) => (
             <a key={p.handle} href={p.url} target="_blank" rel="noopener noreferrer"><Icon name="instagram" size={20} /> @{p.handle}</a>
           ))}
-          {SHOW_DEMO && [1, 2, 3].map((i) => <span key={i} className="demo-slot">贊助夥伴 Logo <DemoTag /></span>)}
         </div>
         <p className="motto">Designers. Spaces.<br />Community. Magic.</p>
         <Link to="/partners" className="btn btn-pill-outline">成為 DDF 贊助夥伴 →</Link>

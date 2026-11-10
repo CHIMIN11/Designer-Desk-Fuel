@@ -96,7 +96,7 @@ export default function Layout() {
             <Link to="/asset-guidelines">素材使用規範</Link>
           </nav>
           <p className="disclaimer">
-            DDF 為工作空間資訊目錄。刊登資訊由店家授權提供並經 DDF 核對，不代表 DDF 推薦、認證、背書或品質保證。
+            DDF 為工作空間資訊目錄。刊登資訊由店家授權提供並經 DDF 核對，不代表 DDF 推薦、認證、背書或品質保證。地圖圖資來源：內政部（政府資料開放授權條款）。
           </p>
         </div>
       </footer>

@@ -44,3 +44,6 @@ create or replace function storage.foldername(name text) returns text[] language
 grant usage on schema storage to anon, authenticated;
 grant all on storage.objects to anon, authenticated;
 grant select on storage.buckets to anon, authenticated;
+
+-- Realtime publication used by Supabase Realtime
+create publication supabase_realtime;

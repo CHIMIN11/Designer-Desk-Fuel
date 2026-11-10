@@ -5,6 +5,7 @@ import { AUTH_STATUS, CATEGORY, PUB_STATUS, formatDate } from '../../lib/labels'
 import { errorText, supabase } from '../../lib/supabase'
 import { AdminCreateSpace, AdminEditSpace } from './AdminSpaceForms'
 import AdminMembers from './AdminMembers'
+import { AdminBanners, AdminChatReports } from './AdminExtras'
 
 type Space = {
   id: string; business_name: string; address: string; city: string; district: string | null; category: string
@@ -30,6 +31,8 @@ const TABS = [
   ['updates', '資料更新'],
   ['reviews', '評價管理'],
   ['members', '會員管理'],
+  ['chat', '聊天檢舉'],
+  ['banners', 'Banner 管理'],
   ['audit', '稽核紀錄'],
 ] as const
 type Tab = (typeof TABS)[number][0]
@@ -157,6 +160,10 @@ export default function Admin() {
       {tab === 'create' && <AdminCreateSpace onDone={load} />}
 
       {tab === 'members' && <AdminMembers />}
+
+      {tab === 'chat' && <AdminChatReports />}
+
+      {tab === 'banners' && <AdminBanners />}
 
       {tab === 'publication' && editSpace && (
         <AdminEditSpace row={editSpace} onClose={(changed) => { setEditSpace(null); if (changed) { setMsg({ kind: 'ok', text: '已更新空間資料並寫入稽核紀錄。' }); load() } }} />

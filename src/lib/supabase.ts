@@ -31,6 +31,11 @@ export function errorText(err: unknown): string {
     [/future expiry date/, '請設定未來的授權到期日。'],
     [/violates check constraint/, '有欄位格式不正確（網址需以 https:// 開頭、Email 需正確）。'],
     [/cannot be changed by the business/, '這個欄位不能由店家修改。'],
+    [/sending too fast/, '傳太快了，請稍候幾秒再試。'],
+    [/duplicate message/, '請勿重複發送相同訊息。'],
+    [/not allowed/, '你沒有執行這個動作的權限。'],
+    [/at most 3 photos/, '每個空間最多 3 張照片。'],
+    [/row-level security/, '你沒有執行這個動作的權限。'],
   ]
   for (const [re, text] of map) if (re.test(msg)) return text
   return msg
