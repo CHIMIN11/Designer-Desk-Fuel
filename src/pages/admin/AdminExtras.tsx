@@ -13,6 +13,7 @@ export function AdminBanners() {
   const [f, setF] = useState({ title: '', subtitle: '', link_url: '', link_label: '', sort_order: '10', starts_at: '', ends_at: '' })
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<Msg>(null)
+  const [editing, setEditing] = useState<BannerRow | null>(null)
 
   const load = useCallback(async () => {
     const { data, error } = await supabase!.from('site_banners').select('*').order('sort_order').order('created_at')
@@ -81,6 +82,8 @@ export function AdminBanners() {
         <button className="btn btn-magic" type="submit" disabled={busy} style={{ justifySelf: 'start' }}>{busy ? '上傳中…' : '新增 Banner'}</button>
       </form>
 
+      {editing && <BannerEdit row={editing} onClose={(changed) => { setEditing(null); if (changed) { setMsg({ kind: 'ok', text: '已更新 Banner。' }); load() } }} />}
+
       <div className="table-wrap">
         <table>
           <thead><tr><th>圖片</th><th>標題</th><th>排程</th><th>排序</th><th>狀態</th><th>操作</th></tr></thead>
@@ -94,6 +97,7 @@ export function AdminBanners() {
                 <td><input type="number" defaultValue={b.sort_order} style={{ width: 70 }} aria-label="排序" onBlur={(e) => Number(e.target.value) !== b.sort_order && update(b.id, { sort_order: Number(e.target.value) })} /></td>
                 <td>{b.is_active ? '顯示中' : '已停用'}</td>
                 <td className="actions">
+                  <button className="btn btn-primary" type="button" onClick={() => setEditing(b)}>編輯</button>
                   <button className="btn btn-pill-outline" type="button" onClick={() => update(b.id, { is_active: !b.is_active })}>{b.is_active ? '停用' : '啟用'}</button>
                   <button className="btn btn-danger" type="button" onClick={() => remove(b)}>刪除</button>
                 </td>
@@ -103,6 +107,83 @@ export function AdminBanners() {
         </table>
       </div>
     </div>
+  )
+}
+
+const toLocal = (iso: string | null) => {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+}
+
+/** Edit an existing banner: text, link, schedule, order, and optionally replace the image. */
+function BannerEdit({ row, onClose }: { row: BannerRow; onClose: (changed: boolean) => void }) {
+  const [f, setF] = useState({
+    title: row.title, subtitle: row.subtitle ?? '', link_url: row.link_url ?? '', link_label: row.link_label ?? '',
+    sort_order: String(row.sort_order), starts_at: toLocal(row.starts_at), ends_at: toLocal(row.ends_at),
+  })
+  const [files, setFiles] = useState<File[]>([])
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value })
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    setErr('')
+    try {
+      const bucket = supabase!.storage.from('site-banners')
+      let image_url = row.image_url
+      if (files[0]) {
+        const file = files[0]
+        const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
+        const path = `${crypto.randomUUID()}.${ext}`
+        const up = await bucket.upload(path, file, { contentType: file.type })
+        if (up.error) throw up.error
+        image_url = bucket.getPublicUrl(path).data.publicUrl
+      }
+      const { error } = await supabase!.from('site_banners').update({
+        title: f.title, subtitle: f.subtitle || null, link_url: f.link_url || null, link_label: f.link_label || null,
+        sort_order: Number(f.sort_order) || 0, image_url,
+        starts_at: f.starts_at ? new Date(f.starts_at).toISOString() : null, ends_at: f.ends_at ? new Date(f.ends_at).toISOString() : null,
+      }).eq('id', row.id)
+      if (error) throw error
+      if (image_url !== row.image_url) {
+        const old = row.image_url.split('/storage/v1/object/public/site-banners/')[1]
+        if (old) await bucket.remove([old])
+      }
+      onClose(true)
+    } catch (ex) {
+      setErr(errorText(ex))
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form className="form admin-form admin-edit card" onSubmit={save} style={{ marginBottom: 20, borderColor: 'var(--gold)' }}>
+      <h2 style={{ margin: 0, fontSize: 20 }}>編輯 Banner</h2>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div>
+          <p className="picker-label" style={{ marginTop: 0 }}>目前圖片</p>
+          <img src={row.image_url} alt="" style={{ width: 240, aspectRatio: '12 / 5', objectFit: 'cover', borderRadius: 10, border: '1px solid var(--line)' }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 220 }}><ImagePicker label="更換圖片（選填）" max={1} files={files} onChange={setFiles} /></div>
+      </div>
+      <div className="two">
+        <label className="field">標題 *<input required maxLength={60} value={f.title} onChange={set('title')} /></label>
+        <label className="field">副標<input maxLength={120} value={f.subtitle} onChange={set('subtitle')} /></label>
+        <label className="field">按鈕連結（站內 /spaces 或 https://）<input pattern="(https://|/).*" value={f.link_url} onChange={set('link_url')} /></label>
+        <label className="field">按鈕文字<input maxLength={20} placeholder="了解更多" value={f.link_label} onChange={set('link_label')} /></label>
+        <label className="field">排序（數字小的先）<input type="number" value={f.sort_order} onChange={set('sort_order')} /></label>
+        <label className="field">開始時間（選填）<input type="datetime-local" value={f.starts_at} onChange={set('starts_at')} /></label>
+        <label className="field">結束時間（選填）<input type="datetime-local" value={f.ends_at} onChange={set('ends_at')} /></label>
+      </div>
+      {err && <p className="notice notice-error" role="alert">{err}</p>}
+      <div className="actions">
+        <button className="btn btn-magic" type="submit" disabled={busy}>{busy ? '儲存中…' : '儲存修改'}</button>
+        <button className="btn btn-pill-outline" type="button" onClick={() => onClose(false)}>取消</button>
+      </div>
+    </form>
   )
 }
 

@@ -13,6 +13,7 @@ export default function BannerCarousel({ banners, children }: { banners: Banner[
   const total = banners.length + 1
   const [i, setI] = useState(0)
   const [paused, setPaused] = useState(false)
+  const touchX = useRef<number | null>(null)
   const reduce = useRef(typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
 
   useEffect(() => {
@@ -27,7 +28,14 @@ export default function BannerCarousel({ banners, children }: { banners: Banner[
   return (
     <section className="bnr" aria-roledescription="carousel" aria-label="首頁 Banner"
       onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+      onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}
+      onTouchStart={(e) => { touchX.current = e.touches[0].clientX }}
+      onTouchEnd={(e) => {
+        if (touchX.current === null) return
+        const dx = e.changedTouches[0].clientX - touchX.current
+        touchX.current = null
+        if (Math.abs(dx) > 50) go(dx < 0 ? i + 1 : i - 1)
+      }}>
       <div className={`bnr-slide bnr-hero${i === 0 ? ' on' : ''}`} aria-hidden={i !== 0}>{children}</div>
       {banners.map((b, k) => {
         const external = b.link_url?.startsWith('https://')
@@ -45,14 +53,19 @@ export default function BannerCarousel({ banners, children }: { banners: Banner[
           </div>
         )
       })}
-      <div className="bnr-ctrl">
-        <button type="button" aria-label="上一張" onClick={() => go(i - 1)}><Icon name="arrow" size={18} stroke={2} /></button>
-        <div className="bnr-dots">
-          {Array.from({ length: total }, (_, n) => (
-            <button key={n} type="button" aria-label={`第 ${n + 1} 張`} aria-current={n === i} className={n === i ? 'on' : ''} onClick={() => go(n)} />
-          ))}
+      <div className="bnr-ctrl-wrap">
+        <div className={`bnr-ctrl${paused || reduce.current ? ' paused' : ''}`}>
+          <button type="button" className="bnr-arrow prev" aria-label="上一張" onClick={() => go(i - 1)}><Icon name="arrow" size={16} stroke={2.2} /></button>
+          <span className="bnr-count" aria-live="polite"><b>{String(i + 1).padStart(2, '0')}</b><span>/ {String(total).padStart(2, '0')}</span></span>
+          <div className="bnr-bars">
+            {Array.from({ length: total }, (_, n) => (
+              <button key={n} type="button" aria-label={`第 ${n + 1} 張`} aria-current={n === i} className={n === i ? 'on' : n < i ? 'done' : ''} onClick={() => go(n)}>
+                <i key={n === i ? `on-${i}` : 'off'} />
+              </button>
+            ))}
+          </div>
+          <button type="button" className="bnr-arrow" aria-label="下一張" onClick={() => go(i + 1)}><Icon name="arrow" size={16} stroke={2.2} /></button>
         </div>
-        <button type="button" aria-label="下一張" onClick={() => go(i + 1)}><Icon name="arrow" size={18} stroke={2} /></button>
       </div>
     </section>
   )
