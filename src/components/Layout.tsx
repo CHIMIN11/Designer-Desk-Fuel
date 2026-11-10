@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import Icon from './Icon'
+import JoinCTA from './JoinCTA'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 export default function Layout() {
@@ -78,6 +79,8 @@ export default function Layout() {
         <NavLink to="/reviews"><Icon name="chat" size={22} /><span>評價</span></NavLink>
         <NavLink to={session ? '/account' : '/login'}><Icon name="user" size={22} /><span>{session ? '我的' : '登入'}</span></NavLink>
       </nav>
+
+      {!['/contact', '/login', '/reset-password', '/lounge'].includes(pathname) && <JoinCTA />}
 
       <footer className="site-footer">
         <div className="container row">
