@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { formatDate } from '../lib/labels'
 import { errorText, supabase } from '../lib/supabase'
+import { deleteReviewPhotos, uploadReviewPhotos } from '../lib/upload'
+import ImagePicker from './ImagePicker'
 
 export type PublicReview = {
   id: string
@@ -11,6 +13,7 @@ export type PublicReview = {
   author_name: string
   body: string
   tags: string[]
+  photo_urls?: string[]
   created_at: string
 }
 
@@ -31,12 +34,27 @@ export function ReviewItem({ r, showSpace = false }: { r: PublicReview; showSpac
         {showSpace && <> · <Link to={`/spaces`}>{r.business_name}</Link></>}
       </p>
       <p className="review-body">「{r.body}」</p>
+      {r.photo_urls && r.photo_urls.length > 0 && <ReviewPhotos urls={r.photo_urls} />}
       {r.tags.length > 0 && (
         <p className="review-tags">{r.tags.map((t) => <span key={t} className="badge badge-muted">{REVIEW_TAGS[t] ?? t}</span>)}</p>
       )}
     </li>
   )
 }
+
+export function ReviewPhotos({ urls }: { urls: string[] }) {
+  return (
+    <div className="review-photos">
+      {urls.map((u, i) => (
+        <a key={u} href={u} target="_blank" rel="noopener noreferrer" aria-label={`查看評價照片 ${i + 1}（另開視窗）`}>
+          <img src={u} alt={`評價照片 ${i + 1}`} loading="lazy" />
+        </a>
+      ))}
+    </div>
+  )
+}
+
+export const PHOTO_NOTE = '最多 3 張。請勿拍到其他客人的臉、螢幕或個人資料；照片會跟評價一起公開。'
 
 /** Real member reviews for one public space. No star ratings, scores or rankings. */
 export default function SpaceReviews({ spaceId }: { spaceId: string }) {
@@ -45,6 +63,8 @@ export default function SpaceReviews({ spaceId }: { spaceId: string }) {
   const [rows, setRows] = useState<PublicReview[]>([])
   const [body, setBody] = useState('')
   const [tags, setTags] = useState<string[]>([])
+  const [files, setFiles] = useState<File[]>([])
+  const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
 
   const load = useCallback(async () => {
@@ -58,14 +78,20 @@ export default function SpaceReviews({ spaceId }: { spaceId: string }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!supabase || !session) return
+    setBusy(true)
+    let photo_urls: string[] = []
+    try { photo_urls = await uploadReviewPhotos(files, session.user.id) } catch (err) { setBusy(false); return setMsg({ kind: 'error', text: errorText(err) }) }
     // author_id must equal the signed-in user; RLS rejects anything else.
-    const { error } = await supabase.from('space_reviews').insert({ space_id: spaceId, author_id: session.user.id, body, tags })
+    const { error } = await supabase.from('space_reviews').insert({ space_id: spaceId, author_id: session.user.id, body, tags, photo_urls })
+    setBusy(false)
     if (error) {
+      await deleteReviewPhotos(photo_urls)
       setMsg({ kind: 'error', text: /duplicate key/.test(error.message) ? '你已評價過這個空間。' : errorText(error) })
       return
     }
     setBody('')
     setTags([])
+    setFiles([])
     setMsg({ kind: 'ok', text: '感謝分享！' })
     load()
   }
@@ -90,9 +116,11 @@ export default function SpaceReviews({ spaceId }: { spaceId: string }) {
                     onClick={() => setTags(tags.includes(k) ? tags.filter((t) => t !== k) : [...tags, k])}>{l}</button>
                 ))}
               </div>
+              <ImagePicker label="附上照片（選填）" max={3} files={files} onChange={setFiles} />
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--muted-2)' }}>{PHOTO_NOTE}</p>
               <p style={{ margin: 0, fontSize: 12, color: 'var(--muted-2)' }}>評價會以你的顯示名稱公開，不會顯示 Email。請分享親身經驗，不實或廣告內容會被隱藏。</p>
               {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
-              <button className="btn btn-primary" type="submit" style={{ justifySelf: 'start' }}>送出評價</button>
+              <button className="btn btn-primary" type="submit" style={{ justifySelf: 'start' }} disabled={busy}>{busy ? '上傳中…' : '送出評價'}</button>
             </form>
           ) : (
             <p style={{ fontSize: 13 }}><Link to="/login?next=/spaces">登入</Link> 後即可分享評價。</p>

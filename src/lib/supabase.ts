@@ -6,7 +6,17 @@ const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 /** True only when real Supabase credentials are present. The UI never fakes data when false. */
 export const isSupabaseConfigured = Boolean(url && anonKey && !url.includes('YOUR-PROJECT-REF'))
 
-export const supabase: SupabaseClient | null = isSupabaseConfigured ? createClient(url!, anonKey!) : null
+/**
+ * The admin console (/admin) keeps its own, separate sign-in: it stores its session under a
+ * different key, so signing in to the admin console never signs you in to the member site
+ * (and vice versa). Moving between the two is always a full page load.
+ */
+export const isAdminArea = typeof window !== 'undefined' &&
+  (window.location.pathname.startsWith('/admin') || window.location.hash.startsWith('#/admin'))
+
+export const supabase: SupabaseClient | null = isSupabaseConfigured
+  ? (isAdminArea ? createClient(url!, anonKey!, { auth: { storageKey: 'ddf-admin-auth' } }) : createClient(url!, anonKey!))
+  : null
 
 export function requireSupabase(): SupabaseClient {
   if (!supabase) throw new Error('尚未連接 Supabase：請設定 VITE_SUPABASE_URL 與 VITE_SUPABASE_ANON_KEY。')

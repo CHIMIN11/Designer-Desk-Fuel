@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import { AUTH_STATUS, CATEGORY, PUB_STATUS, formatDate } from '../../lib/labels'
 import { errorText, supabase } from '../../lib/supabase'
 import { AdminCreateSpace, AdminEditSpace } from './AdminSpaceForms'
 import AdminMembers from './AdminMembers'
+import { ReviewPhotos } from '../../components/SpaceReviews'
 import { AdminBanners, AdminChatReports } from './AdminExtras'
 
 type Space = {
@@ -20,7 +20,7 @@ type Authz = {
 }
 type Asset = { id: string; space_id: string; asset_type: string; asset_url: string; permission_status: string; permission_scope: string | null; permission_expires_at: string | null }
 type UpdateReq = { id: string; space_id: string; changes: Record<string, unknown>; status: string; created_at: string }
-type Review = { id: string; space_id: string; author_id: string; body: string; tags: string[]; status: string; created_at: string }
+type Review = { id: string; space_id: string; author_id: string; body: string; tags: string[]; photo_urls?: string[]; status: string; created_at: string }
 type Audit = { id: number; actor_id: string | null; actor_role: string; action: string; target_table: string; target_id: string | null; reason: string | null; created_at: string }
 
 const TABS = [
@@ -86,7 +86,7 @@ export default function Admin() {
 
   if (!supabase) return <div className="container page"><p className="notice notice-warn">尚未連接 Supabase。</p></div>
   if (loading) return <div className="container page"><p>載入中…</p></div>
-  if (!session) return <div className="container page"><p>請先 <Link to="/login?next=/admin">登入</Link>。</p></div>
+  if (!session) return null
   if (!isAdmin) return <div className="container page"><h1>無權限</h1><p className="lead">此頁僅限 DDF 管理員。</p></div>
 
   const spaceName = (id: string) => spaces.find((s) => s.id === id)?.business_name ?? id.slice(0, 8)
@@ -279,7 +279,7 @@ export default function Admin() {
               {reviews.map((r) => (
                 <tr key={r.id}>
                   <td>{spaceName(r.space_id)}</td>
-                  <td style={{ maxWidth: 420 }}>{r.body}<br /><small>{r.tags.join('、')}</small></td>
+                  <td style={{ maxWidth: 420 }}>{r.body}<br /><small>{r.tags.join('、')}</small>{r.photo_urls && r.photo_urls.length > 0 && <ReviewPhotos urls={r.photo_urls} />}</td>
                   <td>{r.status === 'visible' ? '顯示中' : '已隱藏'}</td>
                   <td>{formatDate(r.created_at)}</td>
                   <td className="actions">

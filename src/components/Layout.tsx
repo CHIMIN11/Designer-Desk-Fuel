@@ -6,7 +6,7 @@ import Icon from './Icon'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 export default function Layout() {
-  const { session, isAdmin, signOut } = useAuth()
+  const { session, signOut } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname, search } = useLocation()
 
@@ -42,7 +42,6 @@ export default function Layout() {
             <NavLink to="/partners">品牌合作</NavLink>
             {session && <NavLink to="/account">會員中心</NavLink>}
             {session && <NavLink to="/merchant">店家中心</NavLink>}
-            {isAdmin && <NavLink to="/admin">管理後台</NavLink>}
             <div className="drawer-auth">
               {session ? (
                 <button type="button" className="btn btn-pill-outline" onClick={signOut}>登出</button>

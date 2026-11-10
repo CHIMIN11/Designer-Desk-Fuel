@@ -924,3 +924,22 @@ html, body { overflow-x: hidden; }
   .bnr-ctrl { top: 12px; bottom: auto; right: 12px; transform: none; }
   .bnr-ctrl > button { width: 34px; height: 34px; }
 }
+
+/* Review photos */
+.review-photos { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.review-photos > a, .review-photos > .picker-item { display: block; width: 104px; height: 104px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); position: relative; }
+.review-photos img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.25s; }
+.review-photos > a:hover img { transform: scale(1.05); }
+@media (max-width: 760px) { .review-photos > a, .review-photos > .picker-item { width: calc((100% - 16px) / 3); height: auto; aspect-ratio: 1; } }
+
+/* Admin console (stand-alone) */
+.adm { min-height: 100vh; background: #0b0a10; }
+.adm-bar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 24px; background: #120f1a; border-bottom: 1px solid #2b2236; }
+.adm-brand { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-size: 16px; }
+.adm-brand b { color: var(--gold); font-weight: 700; }
+.adm-right { display: flex; align-items: center; gap: 10px; }
+.adm-right .btn { min-height: 38px; padding: 0 16px; font-size: 14px; }
+.adm-who { font-size: 13px; color: var(--muted-2); }
+.adm-login { min-height: calc(100vh - 70px); display: grid; place-items: center; padding: 24px 16px; }
+.adm-login .card { width: min(420px, 100%); display: grid; gap: 14px; }
+@media (max-width: 760px) { .adm-who { display: none; } .adm-bar { padding: 10px 12px; } }

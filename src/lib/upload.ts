@@ -22,3 +22,27 @@ export async function uploadSpaceImage(file: File, userId: string, spaceId: stri
   if (error) throw error
   return bucket.getPublicUrl(path).data.publicUrl
 }
+
+/** Uploads review photos to review-photos/<user id>/<random>.<ext>; returns their public URLs. */
+export async function uploadReviewPhotos(files: File[], userId: string): Promise<string[]> {
+  const bucket = supabase!.storage.from('review-photos')
+  const urls: string[] = []
+  for (const file of files) {
+    const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
+    const path = `${userId}/${crypto.randomUUID()}.${ext}`
+    const { error } = await bucket.upload(path, file, { contentType: file.type, upsert: false })
+    if (error) {
+      await deleteReviewPhotos(urls)
+      throw error
+    }
+    urls.push(bucket.getPublicUrl(path).data.publicUrl)
+  }
+  return urls
+}
+
+/** Best-effort removal of review photo files (by public URL). */
+export async function deleteReviewPhotos(urls: string[]): Promise<void> {
+  const marker = '/storage/v1/object/public/review-photos/'
+  const paths = urls.map((u) => u.split(marker)[1]).filter(Boolean)
+  if (paths.length) await supabase!.storage.from('review-photos').remove(paths)
+}

@@ -377,6 +377,21 @@ describe('設計師真實評價', () => {
     expect(await as('anon', 'select * from public.list_public_reviews($1)', [id2])).toHaveLength(0)
   })
 
+  it('photos: up to 3, only from the author\'s own folder, and shown with the public review', async () => {
+    const id = await publishFully()
+    const [{ id: rid }] = await post(MEMBER, id) as { id: string }[]
+    const url = (owner: string, n: number) => `https://x.supabase.co/storage/v1/object/public/review-photos/${owner}/p${n}.jpg`
+    await as(MEMBER, `update public.space_reviews set photo_urls = $2 where id = $1`, [rid, [url(MEMBER, 1), url(MEMBER, 2)]])
+    const rows = await as<{ photo_urls: string[] }>('anon', 'select * from public.list_public_reviews($1)', [id])
+    expect(rows[0].photo_urls).toHaveLength(2)
+    expect(await as<{ photo_urls: string[] }>(MEMBER, 'select * from public.list_my_reviews()')).toHaveLength(1)
+    await expect(as(MEMBER, `update public.space_reviews set photo_urls = $2 where id = $1`, [rid, [url(MERCHANT_B, 1)]])).rejects.toThrow(/uploaded by the author/)
+    await expect(as(MEMBER, `update public.space_reviews set photo_urls = $2 where id = $1`, [rid, ['https://evil.example/x.jpg']])).rejects.toThrow(/uploaded by the author/)
+    await expect(as(MEMBER, `update public.space_reviews set photo_urls = $2 where id = $1`, [rid, [1, 2, 3, 4].map((n) => url(MEMBER, n))])).rejects.toThrow(/check constraint/)
+    await as(ADMIN, `select public.admin_set_review_status($1, 'hidden', 'privacy')`, [rid])
+    expect(await as('anon', 'select * from public.list_public_reviews($1)', [id])).toHaveLength(0)
+  })
+
   it('members cannot hide reviews', async () => {
     const id = await publishFully()
     const [{ id: rid }] = await post(MEMBER, id) as { id: string }[]

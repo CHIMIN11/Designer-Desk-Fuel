@@ -3,7 +3,10 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { formatDate } from '../lib/labels'
 import { errorText, supabase } from '../lib/supabase'
-import { REVIEW_TAGS } from '../components/SpaceReviews'
+import Icon from '../components/Icon'
+import ImagePicker from '../components/ImagePicker'
+import { PHOTO_NOTE, REVIEW_TAGS, ReviewPhotos } from '../components/SpaceReviews'
+import { deleteReviewPhotos, uploadReviewPhotos } from '../lib/upload'
 
 export const MEMBER_TYPE: Record<string, string> = { designer: '設計師', merchant: '店家', other: '其他' }
 export const VISIBILITY: Record<string, string> = {
@@ -101,7 +104,7 @@ function ProfileEditor({ uid }: { uid: string }) {
   )
 }
 
-type MyReview = { id: string; space_id: string; business_name: string; body: string; tags: string[]; status: string; space_public: boolean; created_at: string; updated_at: string }
+type MyReview = { id: string; space_id: string; business_name: string; body: string; tags: string[]; photo_urls: string[]; status: string; space_public: boolean; created_at: string; updated_at: string }
 type SpaceOption = { id: string; business_name: string; city: string; district: string | null }
 
 function ReviewDesk({ uid }: { uid: string }) {
@@ -111,6 +114,9 @@ function ReviewDesk({ uid }: { uid: string }) {
   const [body, setBody] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [editing, setEditing] = useState<string | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [kept, setKept] = useState<string[]>([])
+  const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<Msg>(null)
 
   const load = useCallback(async () => {
@@ -121,14 +127,22 @@ function ReviewDesk({ uid }: { uid: string }) {
   useEffect(() => { load() }, [load])
 
   const reviewed = new Set(mine.map((r) => r.space_id))
-  const reset = () => { setEditing(null); setSpaceId(''); setBody(''); setTags([]) }
+  const reset = () => { setEditing(null); setSpaceId(''); setBody(''); setTags([]); setFiles([]); setKept([]) }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setMsg(null)
+    setBusy(true)
+    let added: string[] = []
+    try { added = await uploadReviewPhotos(files, uid) } catch (err) { setBusy(false); return setMsg({ kind: 'error', text: errorText(err) }) }
+    const photo_urls = [...kept, ...added]
+    const before = editing ? mine.find((r) => r.id === editing)?.photo_urls ?? [] : []
     const { error } = editing
-      ? await supabase!.from('space_reviews').update({ body, tags }).eq('id', editing)
-      : await supabase!.from('space_reviews').insert({ space_id: spaceId, author_id: uid, body, tags })
+      ? await supabase!.from('space_reviews').update({ body, tags, photo_urls }).eq('id', editing)
+      : await supabase!.from('space_reviews').insert({ space_id: spaceId, author_id: uid, body, tags, photo_urls })
+    setBusy(false)
+    if (error) await deleteReviewPhotos(added)
+    else await deleteReviewPhotos(before.filter((u) => !kept.includes(u)))
     if (error) return setMsg({ kind: 'error', text: /duplicate key/.test(error.message) ? '你已評價過這個空間，可在下方修改。' : errorText(error) })
     setMsg({ kind: 'ok', text: editing ? '已更新評價。' : '已發表評價，感謝分享！' })
     reset()
@@ -137,12 +151,14 @@ function ReviewDesk({ uid }: { uid: string }) {
 
   const remove = async (id: string) => {
     if (!window.confirm('確定要刪除這則評價嗎？')) return
+    const photos = mine.find((r) => r.id === id)?.photo_urls ?? []
     const { error } = await supabase!.from('space_reviews').delete().eq('id', id)
+    if (!error) await deleteReviewPhotos(photos)
     setMsg(error ? { kind: 'error', text: errorText(error) } : { kind: 'ok', text: '已刪除評價。' })
     load()
   }
 
-  const edit = (r: MyReview) => { setEditing(r.id); setSpaceId(r.space_id); setBody(r.body); setTags(r.tags); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  const edit = (r: MyReview) => { setEditing(r.id); setSpaceId(r.space_id); setBody(r.body); setTags(r.tags); setKept(r.photo_urls ?? []); setFiles([]); window.scrollTo({ top: 0, behavior: 'smooth' }) }
 
   return (
     <div className="review-desk">
@@ -172,10 +188,22 @@ function ReviewDesk({ uid }: { uid: string }) {
             <button key={k} type="button" className="chip chip-dark" aria-pressed={tags.includes(k)} onClick={() => setTags(tags.includes(k) ? tags.filter((t) => t !== k) : [...tags, k])}>{l}</button>
           ))}
         </div>
+        {kept.length > 0 && (
+          <div className="review-photos">
+            {kept.map((u, i) => (
+              <div key={u} className="picker-item">
+                <img src={u} alt={`目前的照片 ${i + 1}`} />
+                <button type="button" aria-label={`移除第 ${i + 1} 張照片`} onClick={() => setKept(kept.filter((x) => x !== u))}><Icon name="close" size={16} stroke={2.2} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+        {kept.length < 3 && <ImagePicker label="附上照片（選填）" max={3 - kept.length} files={files} onChange={setFiles} />}
+        <p style={{ margin: 0, fontSize: 12, color: 'var(--muted-2)' }}>{PHOTO_NOTE}</p>
         <p style={{ margin: 0, fontSize: 12, color: 'var(--muted-2)' }}>評價以你的顯示名稱公開，不會顯示 Email。請分享親身經驗；不實、廣告或騷擾內容會被管理員隱藏。</p>
         {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
         <div className="actions">
-          <button className="btn btn-magic" type="submit">{editing ? '儲存修改' : '發表評價'}</button>
+          <button className="btn btn-magic" type="submit" disabled={busy}>{busy ? '上傳中…' : editing ? '儲存修改' : '發表評價'}</button>
           {editing && <button className="btn btn-pill-outline" type="button" onClick={reset}>取消修改</button>}
         </div>
       </form>
@@ -192,6 +220,7 @@ function ReviewDesk({ uid }: { uid: string }) {
               {!r.space_public && <span className="badge badge-muted" style={{ marginLeft: 8 }}>空間目前未公開</span>}
             </p>
             <p className="review-body">「{r.body}」</p>
+            {r.photo_urls?.length > 0 && <ReviewPhotos urls={r.photo_urls} />}
             {r.tags.length > 0 && <p className="review-tags">{r.tags.map((t) => <span key={t} className="badge badge-muted">{REVIEW_TAGS[t] ?? t}</span>)}</p>}
             <div className="actions" style={{ marginTop: 10 }}>
               <button className="btn btn-pill-outline" type="button" onClick={() => edit(r)}>修改</button>

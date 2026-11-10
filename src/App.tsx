@@ -10,6 +10,7 @@ import Lounge from './pages/Lounge'
 import Login from './pages/Login'
 import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/admin/Admin'
+import AdminShell from './pages/admin/AdminShell'
 import { AssetGuidelines, LegalPlaceholder, ListingTerms } from './pages/Legal'
 import NotFound from './pages/NotFound'
 import { Community, ComingSoon, MapPage, Partners, Reviews } from './pages/Extra'
@@ -17,6 +18,7 @@ import { Community, ComingSoon, MapPage, Partners, Reviews } from './pages/Extra
 export default function App() {
   return (
     <Routes>
+      <Route path="admin/*" element={<AdminShell><Admin /></AdminShell>} />
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="about" element={<About />} />
@@ -34,7 +36,6 @@ export default function App() {
         <Route path="account" element={<Account />} />
         <Route path="login" element={<Login />} />
         <Route path="reset-password" element={<ResetPassword />} />
-        <Route path="admin" element={<Admin />} />
         <Route path="listing-terms" element={<ListingTerms />} />
         <Route path="asset-guidelines" element={<AssetGuidelines />} />
         <Route path="privacy-policy" element={<LegalPlaceholder title="隱私權政策" />} />
