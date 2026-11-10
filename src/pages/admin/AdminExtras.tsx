@@ -175,3 +175,57 @@ export function AdminChatReports() {
     </div>
   )
 }
+
+type Inquiry = { id: string; plan: string; name: string; company: string | null; email: string; phone: string | null; message: string; status: string; admin_note: string | null; created_at: string }
+export const PLAN_LABELS: Record<string, string> = {
+  space_listing: '空間刊登', brand_sponsor: '品牌贊助', event: '活動與講座合作', tool: '設計工具合作', media: '媒體／社群合作', other: '其他',
+}
+
+/** Partnership inquiries from /contact. Contact details are shown only here, to admins. */
+export function AdminInquiries() {
+  const [rows, setRows] = useState<Inquiry[]>([])
+  const [filter, setFilter] = useState('new')
+  const [msg, setMsg] = useState<Msg>(null)
+  const load = useCallback(async () => {
+    let q = supabase!.from('contact_inquiries').select('*').order('created_at', { ascending: false }).limit(300)
+    if (filter !== 'all') q = q.eq('status', filter)
+    const { data, error } = await q
+    if (error) setMsg({ kind: 'error', text: errorText(error) })
+    setRows((data ?? []) as Inquiry[])
+  }, [filter])
+  useEffect(() => { load() }, [load])
+
+  const setStatus = async (r: Inquiry, status: string) => {
+    const note = status === 'closed' ? window.prompt('結案備註（選填）', r.admin_note ?? '') : r.admin_note
+    const { error } = await supabase!.from('contact_inquiries').update({ status, admin_note: note || null }).eq('id', r.id)
+    setMsg(error ? { kind: 'error', text: errorText(error) } : { kind: 'ok', text: '已更新狀態。' })
+    load()
+  }
+
+  return (
+    <div>
+      <div className="actions" style={{ marginBottom: 14 }}>
+        {[['new', '新進'], ['replied', '已回覆'], ['closed', '已結案'], ['all', '全部']].map(([v, l]) => (
+          <button key={v} type="button" className={`btn ${filter === v ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter(v)}>{l}</button>
+        ))}
+      </div>
+      {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
+      {rows.length === 0 && <p className="card">沒有洽詢。</p>}
+      <div className="inq-list">
+        {rows.map((r) => (
+          <article key={r.id} className="card inq">
+            <p className="inq-meta"><span className="badge badge-muted">{PLAN_LABELS[r.plan] ?? r.plan}</span> {formatDate(r.created_at)} · {r.status === 'new' ? '新進' : r.status === 'replied' ? '已回覆' : '已結案'}</p>
+            <h3>{r.name}{r.company && <small> · {r.company}</small>}</h3>
+            <p className="inq-contact"><a href={`mailto:${r.email}?subject=${encodeURIComponent('DDF 合作洽詢回覆')}`}>{r.email}</a>{r.phone && <> · {r.phone}</>}</p>
+            <p className="inq-body">{r.message}</p>
+            {r.admin_note && <p className="hint">備註：{r.admin_note}</p>}
+            <div className="actions">
+              {r.status !== 'replied' && <button type="button" className="btn btn-pill-outline" onClick={() => setStatus(r, 'replied')}>標記已回覆</button>}
+              {r.status !== 'closed' && <button type="button" className="btn btn-pill-outline" onClick={() => setStatus(r, 'closed')}>結案</button>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  )
+}

@@ -86,7 +86,7 @@ export function Partners() {
         </div>
         <div className="card"><h2 style={{ fontSize: 19, marginTop: 0 }}>成為 DDF 贊助夥伴</h2>
           <p style={{ color: 'var(--muted)', lineHeight: 1.8 }}>活動贊助、設計師工具合作、空間合作提案。</p>
-          <p className="notice notice-warn" style={{ fontSize: 13 }}>聯絡方式【待確認：合作聯絡 Email】</p>
+          <Link to="/contact?plan=brand_sponsor" className="btn btn-magic">查看合作方案・聯絡我們</Link>
         </div>
         <div className="card"><h2 style={{ fontSize: 19, marginTop: 0 }}>空間店家</h2>
           <p style={{ color: 'var(--muted)', lineHeight: 1.8 }}>咖啡店、共享空間、工作室，免費申請授權刊登。</p>

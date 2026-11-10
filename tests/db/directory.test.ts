@@ -590,3 +590,23 @@ describe('DEMO data and account deletion', () => {
     ).rejects.toThrow(/terms/)
   })
 })
+
+describe('聯絡我們／合作方案', () => {
+  const send = (who: string, email = 'brand@example.com') =>
+    as(who, `insert into public.contact_inquiries (plan, name, email, message, consent) values ('brand_sponsor', '品牌窗口', $1, '我們想贊助設計師聚會，請問合作方式與時程？', true)`, [email])
+
+  it('anyone can send; only admins can read and update; rate limited per email', async () => {
+    await send('anon')
+    expect(await as('anon', 'select count(*)::int as n from public.contact_inquiries').catch((e) => String(e))).toMatch(/permission denied/)
+    expect(await as(MEMBER, 'select * from public.contact_inquiries')).toHaveLength(0)
+    const rows = await as<{ id: string }>(ADMIN, 'select * from public.contact_inquiries')
+    expect(rows).toHaveLength(1)
+    await as(ADMIN, `update public.contact_inquiries set status = 'replied' where id = $1`, [rows[0].id])
+    await send(MEMBER)
+    await send('anon')
+    await expect(send('anon')).rejects.toThrow(/too many inquiries/)
+    await expect(as('anon', `insert into public.contact_inquiries (plan, name, email, message, consent) values ('other', 'x', 'a@b.co', '太短', true)`)).rejects.toThrow(/check constraint/)
+    await expect(as('anon', `insert into public.contact_inquiries (plan, name, email, message, consent, status) values ('other', 'x', 'c@b.co', '這是一段超過二十個字的合作洽詢內容內容內容', true, 'closed')`)).rejects.toThrow(/permission denied/)
+  })
+})
+

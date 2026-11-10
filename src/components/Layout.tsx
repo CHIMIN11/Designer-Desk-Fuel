@@ -86,6 +86,7 @@ export default function Layout() {
             <span style={{ fontSize: 13, color: 'var(--muted-2)' }}>Find Your Space.<br />Fuel Your Magic.</span>
           </div>
           <nav aria-label="法律與政策">
+            <Link to="/contact">聯絡我們・合作方案</Link>
             <Link to="/privacy-policy">隱私權政策</Link>
             <Link to="/terms-of-service">服務條款</Link>
             <Link to="/community-guidelines">社群守則</Link>

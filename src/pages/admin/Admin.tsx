@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { AUTH_STATUS, CATEGORY, PUB_STATUS, formatDate } from '../../lib/labels'
@@ -5,7 +6,7 @@ import { errorText, supabase } from '../../lib/supabase'
 import { AdminCreateSpace, AdminEditSpace } from './AdminSpaceForms'
 import AdminMembers from './AdminMembers'
 import { ReviewPhotos } from '../../components/SpaceReviews'
-import { AdminBanners, AdminChatReports } from './AdminExtras'
+import { AdminBanners, AdminChatReports, AdminInquiries } from './AdminExtras'
 
 type Space = {
   id: string; business_name: string; address: string; city: string; district: string | null; category: string
@@ -23,25 +24,33 @@ type UpdateReq = { id: string; space_id: string; changes: Record<string, unknown
 type Review = { id: string; space_id: string; author_id: string; body: string; tags: string[]; photo_urls?: string[]; status: string; created_at: string }
 type Audit = { id: number; actor_id: string | null; actor_role: string; action: string; target_table: string; target_id: string | null; reason: string | null; created_at: string }
 
-const TABS = [
-  ['applications', '申請審核'],
-  ['create', '新增空間'],
-  ['publication', '上架管理'],
-  ['assets', '素材授權'],
-  ['updates', '資料更新'],
-  ['reviews', '評價管理'],
-  ['members', '會員管理'],
-  ['chat', '聊天檢舉'],
-  ['banners', 'Banner 管理'],
-  ['audit', '稽核紀錄'],
+/** Admin sections grouped by job: listing review, members & community, marketing, system. */
+const GROUPS = [
+  { id: 'review', label: '空間審查', en: 'Space Review', tabs: [
+    ['applications', '申請審核'], ['publication', '上架管理'], ['assets', '素材授權'], ['updates', '資料更新'], ['create', '新增空間'],
+  ] },
+  { id: 'members', label: '會員與社群', en: 'Members & Community', tabs: [
+    ['members', '會員管理'], ['reviews', '評價管理'], ['chat', '聊天檢舉'],
+  ] },
+  { id: 'marketing', label: '行銷', en: 'Marketing', tabs: [
+    ['banners', 'Banner 管理'], ['inquiries', '合作洽詢'],
+  ] },
+  { id: 'system', label: '系統', en: 'System', tabs: [
+    ['audit', '稽核紀錄'],
+  ] },
 ] as const
-type Tab = (typeof TABS)[number][0]
+type TabEntry = (typeof GROUPS)[number]['tabs'][number]
+const TABS: readonly TabEntry[] = GROUPS.flatMap((g): readonly TabEntry[] => g.tabs)
+type Tab = TabEntry[0]
+const isTab = (v: string | null): v is Tab => TABS.some(([id]) => id === v)
 
 const oneYear = () => new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10)
 
 export default function Admin() {
   const { session, isAdmin, loading } = useAuth()
-  const [tab, setTab] = useState<Tab>('applications')
+  const [params, setParams] = useSearchParams()
+  const tab: Tab = isTab(params.get('tab')) ? (params.get('tab') as Tab) : 'applications'
+  const setTab = (t: Tab) => setParams(t === 'applications' ? {} : { tab: t })
   const [spaces, setSpaces] = useState<Space[]>([])
   const [auths, setAuths] = useState<Authz[]>([])
   const [assets, setAssets] = useState<Asset[]>([])
@@ -99,25 +108,39 @@ export default function Admin() {
     ['需複查', spaces.filter((s) => s.publication_status === 'published' && (!s.next_review_at || new Date(s.next_review_at) < new Date())).length],
   ] as const
 
-  return (
-    <div className="container page">
-      <h1>Space Partner Management</h1>
-      <p className="lead">所有操作都會寫入稽核紀錄。審核時請依最小必要原則查看聯絡資料。</p>
+  const group = GROUPS.find((g) => (g.tabs as readonly TabEntry[]).some(([id]) => id === tab))!
+  const label = TABS.find(([id]) => id === tab)![1]
+  const counts: Partial<Record<Tab, number>> = {
+    applications: pendingAuths.length,
+    assets: assets.filter((a) => a.permission_status === 'pending').length,
+    updates: updates.length,
+  }
 
-      <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: 24 }}>
-        {stats.map(([label, n]) => (
-          <div key={label} className="card" style={{ padding: 16 }}>
-            <div style={{ fontSize: 12, color: 'var(--muted-2)' }}>{label}</div>
-            <div style={{ fontSize: 28, fontWeight: 700 }}>{n}</div>
+  return (
+    <div className="adm-layout">
+      <nav className="adm-side" aria-label="後台分類">
+        {GROUPS.map((g) => (
+          <div key={g.id} className="adm-group">
+            <p className="adm-group-h">{g.label}<span>{g.en}</span></p>
+            {(g.tabs as readonly TabEntry[]).map(([id, l]) => (
+              <button key={id} type="button" className={tab === id ? 'on' : ''} aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)}>
+                {l}{counts[id] ? <b className="adm-count">{counts[id]}</b> : null}
+              </button>
+            ))}
           </div>
         ))}
-      </div>
+      </nav>
+      <section className="adm-main">
+      <p className="ab-kicker" style={{ marginBottom: 6 }}>{group.label} · {group.en}</p>
+      <h1 className="adm-title">{label}</h1>
 
-      <div className="admin-tabs" role="tablist">
-        {TABS.map(([id, label]) => (
-          <button key={id} type="button" role="tab" aria-selected={tab === id} className={`btn ${tab === id ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab(id)}>{label}</button>
-        ))}
-      </div>
+      {group.id === 'review' && (
+        <div className="adm-stats">
+          {stats.map(([l, n]) => (
+            <div key={l} className="card"><div className="k">{l}</div><div className="v">{n}</div></div>
+          ))}
+        </div>
+      )}
 
       {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
 
@@ -164,6 +187,8 @@ export default function Admin() {
       {tab === 'chat' && <AdminChatReports />}
 
       {tab === 'banners' && <AdminBanners />}
+
+      {tab === 'inquiries' && <AdminInquiries />}
 
       {tab === 'publication' && editSpace && (
         <AdminEditSpace row={editSpace} onClose={(changed) => { setEditSpace(null); if (changed) { setMsg({ kind: 'ok', text: '已更新空間資料並寫入稽核紀錄。' }); load() } }} />
@@ -314,6 +339,7 @@ export default function Admin() {
           </table>
         </div>
       )}
+      </section>
     </div>
   )
 }
