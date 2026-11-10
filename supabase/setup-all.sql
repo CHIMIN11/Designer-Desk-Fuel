@@ -1859,3 +1859,8 @@ revoke execute on function public.suggestion_rate_limit() from public, anon, aut
 
 create trigger space_suggestions_rate_limit before insert on public.space_suggestions
   for each row execute function public.suggestion_rate_limit();
+
+-- ===== supabase/migrations/20261111001400_suggestion_admin_edit.sql =====
+-- Admins can correct a member suggestion (name, city, link, reason). The update policy
+-- already limits every UPDATE on this table to admins.
+grant update (name, city, link, reason) on public.space_suggestions to authenticated;

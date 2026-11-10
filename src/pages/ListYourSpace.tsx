@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { DistrictPicker, HOURS_CHIPS, QuickText, SEATING_CHIPS, Segmented } from '../components/FormWidgets'
 import { useAuth } from '../lib/auth'
 import { CATEGORY, CITIES, POWER, PRICE } from '../lib/labels'
 import { errorText, supabase } from '../lib/supabase'
@@ -19,14 +20,6 @@ const empty = {
   }
 
 const tri = (v: string) => (v === '' ? null : v === 'yes')
-
-const YesNo = ({ label, value, onChange }: { label: string; value: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
-  <label className="field">{label}
-    <select value={value} onChange={onChange}>
-      <option value="">不提供</option><option value="yes">是</option><option value="no">否</option>
-    </select>
-  </label>
-)
 
 export default function ListYourSpace() {
   const { session } = useAuth()
@@ -128,45 +121,33 @@ export default function ListYourSpace() {
                 </select>
               </label>
               <label className="field">縣市 *
-                <select value={f.city} onChange={upd('city')}>{CITIES.map((c) => <option key={c}>{c}</option>)}</select>
+                <select value={f.city} onChange={(e) => setF({ ...f, city: e.target.value, district: '' })}>{CITIES.map((c) => <option key={c}>{c}</option>)}</select>
               </label>
-              <label className="field">行政區<input maxLength={40} value={f.district} onChange={upd('district')} /></label>
+              <DistrictPicker city={f.city} value={f.district} onChange={(v) => setF({ ...f, district: v })} />
             </div>
             <label className="field">營業地址 *<input required maxLength={200} value={f.address} onChange={upd('address')} /></label>
             <div className="two">
               <label className="field">官方網站<input type="url" pattern="https://.*" placeholder="https://" value={f.official_website} onChange={upd('official_website')} /></label>
               <label className="field">官方社群<input type="url" pattern="https://.*" placeholder="https://" value={f.official_social_url} onChange={upd('official_social_url')} /></label>
-              <label className="field">消費價格
-                <select value={f.price_range} onChange={upd('price_range')}>
-                  <option value="">不提供</option>
-                  {Object.entries(PRICE).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              </label>
-              <label className="field">Wi‑Fi
-                <select value={f.wifi_available} onChange={upd('wifi_available')}>
-                  <option value="">不提供</option><option value="yes">有</option><option value="no">無</option>
-                </select>
-              </label>
-              <label className="field">插座
-                <select value={f.power_outlets} onChange={upd('power_outlets')}>
-                  <option value="">不提供</option>
-                  {Object.entries(POWER).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              </label>
+            </div>
+            <div className="seg-grid">
+              <Segmented label="消費價格" value={f.price_range} onChange={(v) => setF({ ...f, price_range: v })} options={[...Object.entries(PRICE), ['', '不確定']]} />
+              <Segmented label="Wi‑Fi" value={f.wifi_available} onChange={(v) => setF({ ...f, wifi_available: v })} />
+              <Segmented label="插座" value={f.power_outlets} onChange={(v) => setF({ ...f, power_outlets: v })} options={[...Object.entries(POWER), ['', '不確定']]} />
+              <Segmented label="不限用餐時間" value={f.no_time_limit} onChange={(v) => setF({ ...f, no_time_limit: v })} />
+              <Segmented label="店內有洗手間" value={f.has_restroom} onChange={(v) => setF({ ...f, has_restroom: v })} />
+              <Segmented label="可放筆電＋繪圖板的大桌面" value={f.large_tables} onChange={(v) => setF({ ...f, large_tables: v })} />
+              <Segmented label="可接待設計師聚會（團體）" value={f.group_friendly} onChange={(v) => setF({ ...f, group_friendly: v })} />
+              <Segmented label="可租借辦活動／講座／工作坊" value={f.supports_events} onChange={(v) => setF({ ...f, supports_events: v })} />
             </div>
             <div className="two">
-              <YesNo label="不限用餐時間" value={f.no_time_limit} onChange={upd('no_time_limit')} />
-              <YesNo label="店內有洗手間" value={f.has_restroom} onChange={upd('has_restroom')} />
-              <label className="field">低消金額（NT$，無低消填 0）<input type="number" min={0} max={10000} value={f.minimum_charge} onChange={upd('minimum_charge')} /></label>
-              <YesNo label="有可放筆電＋繪圖板的大桌面" value={f.large_tables} onChange={upd('large_tables')} />
-              <YesNo label="可接待設計師聚會（團體）" value={f.group_friendly} onChange={upd('group_friendly')} />
-              <YesNo label="可租借辦活動／講座／工作坊" value={f.supports_events} onChange={upd('supports_events')} />
+              <label className="field">低消金額（NT$，無低消填 0）<input type="number" inputMode="numeric" min={0} max={10000} placeholder="例：150" value={f.minimum_charge} onChange={upd('minimum_charge')} /></label>
               {f.supports_events === 'yes' && (
-                <label className="field">活動可容納人數<input type="number" min={1} max={2000} value={f.event_capacity} onChange={upd('event_capacity')} /></label>
+                <label className="field">活動可容納人數<input type="number" inputMode="numeric" min={1} max={2000} placeholder="例：30" value={f.event_capacity} onChange={upd('event_capacity')} /></label>
               )}
             </div>
-            <label className="field">營業時間（含用餐時限）<textarea maxLength={500} value={f.opening_hours} onChange={upd('opening_hours')} placeholder="例：週二至週日 09:00–20:00，平日無用餐時限，假日 2 小時" /></label>
-            <label className="field">座位與場地資訊<textarea maxLength={500} value={f.seating_information} onChange={upd('seating_information')} placeholder="例：單人座 8 席、長桌 2 張" /></label>
+            <QuickText label="營業時間（含用餐時限）" value={f.opening_hours} onChange={(v) => setF({ ...f, opening_hours: v })} chips={HOURS_CHIPS} placeholder="點上方快速填入，或自行輸入，例：週二至週日 09:00–20:00" />
+            <QuickText label="座位與場地資訊" value={f.seating_information} onChange={(v) => setF({ ...f, seating_information: v })} chips={SEATING_CHIPS} placeholder="例：單人座 8 席、長桌 2 張" />
           </fieldset>
 
           <fieldset>

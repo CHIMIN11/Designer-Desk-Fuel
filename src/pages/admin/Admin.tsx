@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { AUTH_STATUS, CATEGORY, PUB_STATUS, formatDate } from '../../lib/labels'
 import { errorText, supabase } from '../../lib/supabase'
-import { AdminCreateSpace, AdminEditSpace } from './AdminSpaceForms'
+import { AdminCreateSpace, AdminEditSpace, type SpacePrefill } from './AdminSpaceForms'
 import AdminMembers from './AdminMembers'
 import { ReviewPhotos } from '../../components/SpaceReviews'
 import { AdminBanners, AdminChatReports, AdminInquiries, AdminSuggestions } from './AdminExtras'
@@ -51,6 +51,7 @@ export default function Admin() {
   const [params, setParams] = useSearchParams()
   const tab: Tab = isTab(params.get('tab')) ? (params.get('tab') as Tab) : 'applications'
   const setTab = (t: Tab) => setParams(t === 'applications' ? {} : { tab: t })
+  const [prefill, setPrefill] = useState<SpacePrefill | null>(null)
   const [spaces, setSpaces] = useState<Space[]>([])
   const [auths, setAuths] = useState<Authz[]>([])
   const [assets, setAssets] = useState<Asset[]>([])
@@ -180,7 +181,7 @@ export default function Admin() {
         </div>
       )}
 
-      {tab === 'create' && <AdminCreateSpace onDone={load} />}
+      {tab === 'create' && <AdminCreateSpace key={prefill?.suggestionId ?? 'blank'} prefill={prefill} onDone={() => { setPrefill(null); load() }} />}
 
       {tab === 'members' && <AdminMembers />}
 
@@ -190,7 +191,7 @@ export default function Admin() {
 
       {tab === 'inquiries' && <AdminInquiries />}
 
-      {tab === 'suggestions' && <AdminSuggestions />}
+      {tab === 'suggestions' && <AdminSuggestions onConvert={(p) => { setPrefill(p); setTab('create') }} />}
 
       {tab === 'publication' && editSpace && (
         <AdminEditSpace row={editSpace} onClose={(changed) => { setEditSpace(null); if (changed) { setMsg({ kind: 'ok', text: '已更新空間資料並寫入稽核紀錄。' }); load() } }} />

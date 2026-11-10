@@ -7,8 +7,25 @@ const oneYear = () => new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 
 type Msg = { kind: 'ok' | 'error'; text: string } | null
 
 /** Admin enters a listing on behalf of a business that authorised DDF (e.g. by email). */
-export function AdminCreateSpace({ onDone }: { onDone: () => void }) {
-  const [draft, setDraft] = useState<SpaceDraft>(emptyDraft())
+export type SpacePrefill = { suggestionId: string; name: string; city: string | null; link: string | null; reason: string }
+
+const CITY_MAP: Record<string, string> = { 臺北市: '台北市', 臺中市: '台中市' }
+
+function draftFrom(p?: SpacePrefill | null): SpaceDraft {
+  const d = emptyDraft()
+  if (!p) return d
+  d.business_name = p.name
+  if (p.city) d.city = CITY_MAP[p.city] ?? p.city
+  if (p.link) {
+    if (/instagram|facebook|threads|line\.me/i.test(p.link)) d.official_social_url = p.link
+    else if (!/google\.[^/]+\/maps|goo\.gl|maps\.app/i.test(p.link)) d.official_website = p.link
+  }
+  return d
+}
+
+export function AdminCreateSpace({ onDone, prefill }: { onDone: () => void; prefill?: SpacePrefill | null }) {
+  const [draft, setDraft] = useState<SpaceDraft>(() => draftFrom(prefill))
+  const [publishNow, setPublishNow] = useState(true)
   const [auth, setAuth] = useState({
     applicant_name: '', applicant_position: '', applicant_email: '', evidence_reference: '', expires_at: oneYear(), owner_email: '',
   })
@@ -21,7 +38,7 @@ export function AdminCreateSpace({ onDone }: { onDone: () => void }) {
     e.preventDefault()
     setBusy(true)
     setMsg(null)
-    const { error } = await supabase!.rpc('admin_create_space', {
+    const { data: newId, error } = await supabase!.rpc('admin_create_space', {
       p_space: toPayload(draft),
       p_authorization: {
         applicant_name: auth.applicant_name, applicant_position: auth.applicant_position, applicant_email: auth.applicant_email,
@@ -35,7 +52,17 @@ export function AdminCreateSpace({ onDone }: { onDone: () => void }) {
       setMsg({ kind: 'error', text: /no member account/.test(error.message) ? '找不到使用這個 Email 的會員帳號。' : errorText(error) })
       return
     }
-    setMsg({ kind: 'ok', text: auth.evidence_reference ? '已建立並核准授權。下一步：到「上架管理」核對資料後上架。' : '已建立，授權狀態為審核中（未填授權證明）。' })
+    let text = auth.evidence_reference ? '已建立並核准授權。下一步：到「上架管理」核對資料後上架。' : '已建立，授權狀態為審核中（未填授權證明）。'
+    if (auth.evidence_reference && publishNow && newId) {
+      const next = new Date(Date.now() + 90 * 86400000).toISOString()
+      const v = await supabase!.rpc('admin_verify_space', { p_space_id: newId, p_next_review_at: next, p_note: '管理員建立時核對' })
+      const p = v.error ? v : await supabase!.rpc('admin_set_publication', { p_space_id: newId, p_status: 'published', p_reason: '管理員建立並上架' })
+      text = p.error ? `已建立並核准授權，但自動上架失敗：${errorText(p.error)}。請到「上架管理」處理。` : '✦ 已建立、核對並上架！到「探索空間」就能看到，會員也能開始寫評價了。'
+    }
+    if (prefill?.suggestionId) {
+      await supabase!.from('space_suggestions').update({ status: 'listed', admin_note: `已建立空間 ${draft.business_name}` }).eq('id', prefill.suggestionId)
+    }
+    setMsg({ kind: 'ok', text })
     setDraft(emptyDraft())
     setAuth({ ...auth, applicant_name: '', applicant_position: '', applicant_email: '', evidence_reference: '', owner_email: '' })
     onDone()
@@ -46,6 +73,7 @@ export function AdminCreateSpace({ onDone }: { onDone: () => void }) {
       <p className="notice notice-info" style={{ margin: 0 }}>
         用於店家已透過 Email、電話或當面授權，由管理員代為建立資料。授權證明與到期日都填寫時會直接核准授權；仍需「核對資料」後才能上架。
       </p>
+      {prefill && <p className="notice notice-ok" style={{ margin: 0 }}>由會員推薦帶入：{prefill.name}。推薦原因：「{prefill.reason}」（僅供參考，不會公開）</p>}
       <SpaceFields value={draft} onChange={setDraft} />
       <fieldset>
         <legend>授權資料</legend>
@@ -61,8 +89,9 @@ export function AdminCreateSpace({ onDone }: { onDone: () => void }) {
         <label className="check"><input type="checkbox" checked={scope.logo} onChange={(e) => setScope({ ...scope, logo: e.target.checked })} /> Logo 使用授權</label>
         <label className="check"><input type="checkbox" checked={scope.official_text} onChange={(e) => setScope({ ...scope, official_text: e.target.checked })} /> 官方文字介紹使用授權</label>
       </fieldset>
+      <label className="check"><input type="checkbox" checked={publishNow} onChange={(e) => setPublishNow(e.target.checked)} /> 填了授權證明時，建立後直接核對並上架（下次複查：90 天後）</label>
       {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
-      <button className="btn btn-magic" type="submit" disabled={busy} style={{ justifySelf: 'start', minHeight: 48 }}>{busy ? '建立中…' : '建立空間'}</button>
+      <button className="btn btn-magic" type="submit" disabled={busy} style={{ justifySelf: 'start', minHeight: 48 }}>{busy ? '建立中…' : publishNow && auth.evidence_reference ? '建立並上架' : '建立空間'}</button>
     </form>
   )
 }

@@ -1,4 +1,5 @@
 import { CATEGORY, CITIES, POWER, PRICE } from '../lib/labels'
+import { DistrictPicker, HOURS_CHIPS, QuickText, SEATING_CHIPS, Segmented } from './FormWidgets'
 
 /** Editable space data as form strings ('' = not provided, 'yes'/'no' for booleans). */
 export type SpaceDraft = Record<(typeof FIELD_KEYS)[number], string>
@@ -43,16 +44,6 @@ export function changedKeys(before: SpaceDraft, after: SpaceDraft) {
   return FIELD_KEYS.filter((k) => before[k] !== after[k])
 }
 
-function YesNo({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label className="field">{label}
-      <select value={value} onChange={(e) => onChange(e.target.value)}>
-        <option value="">不提供</option><option value="yes">是</option><option value="no">否</option>
-      </select>
-    </label>
-  )
-}
-
 export default function SpaceFields({ value, onChange }: { value: SpaceDraft; onChange: (d: SpaceDraft) => void }) {
   const set = (k: keyof SpaceDraft) => (v: string) => onChange({ ...value, [k]: v })
   const ev = (k: keyof SpaceDraft) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => set(k)(e.target.value)
@@ -69,9 +60,9 @@ export default function SpaceFields({ value, onChange }: { value: SpaceDraft; on
             </select>
           </label>
           <label className="field">縣市 *
-            <select value={value.city} onChange={ev('city')}>{CITIES.map((c) => <option key={c}>{c}</option>)}</select>
+            <select value={value.city} onChange={(e) => onChange({ ...value, city: e.target.value, district: '' })}>{CITIES.map((c) => <option key={c}>{c}</option>)}</select>
           </label>
-          <label className="field">行政區<input maxLength={40} value={value.district} onChange={ev('district')} /></label>
+          <DistrictPicker city={value.city} value={value.district} onChange={set('district')} />
         </div>
         <label className="field">地址 *<input required maxLength={200} value={value.address} onChange={ev('address')} /></label>
         <div className="two">
@@ -83,32 +74,24 @@ export default function SpaceFields({ value, onChange }: { value: SpaceDraft; on
 
       <fieldset>
         <legend>工作條件</legend>
+        <div className="seg-grid">
+          <Segmented label="價格區間" value={value.price_range} onChange={set('price_range')} options={[...Object.entries(PRICE), ['', '不確定']]} />
+          <Segmented label="Wi‑Fi" value={value.wifi_available} onChange={set('wifi_available')} />
+          <Segmented label="插座" value={value.power_outlets} onChange={set('power_outlets')} options={[...Object.entries(POWER), ['', '不確定']]} />
+          <Segmented label="不限用餐時間" value={value.no_time_limit} onChange={set('no_time_limit')} />
+          <Segmented label="店內有洗手間" value={value.has_restroom} onChange={set('has_restroom')} />
+          <Segmented label="大桌面（可放繪圖板）" value={value.large_tables} onChange={set('large_tables')} />
+          <Segmented label="可接待設計師聚會" value={value.group_friendly} onChange={set('group_friendly')} />
+          <Segmented label="可辦活動／講座" value={value.supports_events} onChange={set('supports_events')} />
+        </div>
         <div className="two">
-          <label className="field">價格區間
-            <select value={value.price_range} onChange={ev('price_range')}>
-              <option value="">不提供</option>
-              {Object.entries(PRICE).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-          </label>
-          <label className="field">低消（NT$，無低消填 0）<input type="number" min={0} max={10000} value={value.minimum_charge} onChange={ev('minimum_charge')} /></label>
-          <YesNo label="Wi‑Fi" value={value.wifi_available} onChange={set('wifi_available')} />
-          <label className="field">插座
-            <select value={value.power_outlets} onChange={ev('power_outlets')}>
-              <option value="">不提供</option>
-              {Object.entries(POWER).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-          </label>
-          <YesNo label="不限用餐時間" value={value.no_time_limit} onChange={set('no_time_limit')} />
-          <YesNo label="店內有洗手間" value={value.has_restroom} onChange={set('has_restroom')} />
-          <YesNo label="大桌面（可放繪圖板）" value={value.large_tables} onChange={set('large_tables')} />
-          <YesNo label="可接待設計師聚會" value={value.group_friendly} onChange={set('group_friendly')} />
-          <YesNo label="可辦活動／講座" value={value.supports_events} onChange={set('supports_events')} />
+          <label className="field">低消（NT$，無低消填 0）<input type="number" inputMode="numeric" min={0} max={10000} value={value.minimum_charge} onChange={ev('minimum_charge')} /></label>
           {value.supports_events === 'yes' && (
-            <label className="field">活動可容納人數<input type="number" min={1} max={2000} value={value.event_capacity} onChange={ev('event_capacity')} /></label>
+            <label className="field">活動可容納人數<input type="number" inputMode="numeric" min={1} max={2000} value={value.event_capacity} onChange={ev('event_capacity')} /></label>
           )}
         </div>
-        <label className="field">營業時間（含用餐時限）<textarea maxLength={500} value={value.opening_hours} onChange={ev('opening_hours')} /></label>
-        <label className="field">座位與場地資訊<textarea maxLength={500} value={value.seating_information} onChange={ev('seating_information')} /></label>
+        <QuickText label="營業時間（含用餐時限）" value={value.opening_hours} onChange={set('opening_hours')} chips={HOURS_CHIPS} />
+        <QuickText label="座位與場地資訊" value={value.seating_information} onChange={set('seating_information')} chips={SEATING_CHIPS} />
       </fieldset>
     </>
   )

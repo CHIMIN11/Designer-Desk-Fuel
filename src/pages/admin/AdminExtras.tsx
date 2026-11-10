@@ -315,8 +315,9 @@ type Suggestion = { id: string; name: string; city: string | null; link: string 
 const SUG_STATUS: Record<string, string> = { new: '新推薦', contacted: '洽談中', listed: '已上架', declined: '店家婉拒' }
 
 /** Member suggestions: leads to contact businesses for authorization. Never auto-published. */
-export function AdminSuggestions() {
+export function AdminSuggestions({ onConvert }: { onConvert: (p: { suggestionId: string; name: string; city: string | null; link: string | null; reason: string }) => void }) {
   const [rows, setRows] = useState<Suggestion[]>([])
+  const [edit, setEdit] = useState<Suggestion | null>(null)
   const [msg, setMsg] = useState<Msg>(null)
   const load = useCallback(async () => {
     const { data, error } = await supabase!.from('space_suggestions').select('*').order('created_at', { ascending: false }).limit(300)
@@ -333,7 +334,7 @@ export function AdminSuggestions() {
   }
   return (
     <div>
-      <p className="notice notice-info">會員推薦的空間只是聯繫名單，不會自動上架。取得店家同意後，到「新增空間」建立並填寫授權證明，再把這裡標成「已上架」。</p>
+      <p className="notice notice-info">會員推薦的空間只是聯繫名單，不會自動上架。取得店家同意後按「建立空間並上架」，資料會自動帶入；填好授權證明送出就會直接上架，並把這筆推薦標成「已上架」。</p>
       {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
       {rows.length === 0 && <p className="card">還沒有會員推薦。</p>}
       <div className="inq-list">
@@ -344,7 +345,25 @@ export function AdminSuggestions() {
             {r.link && <p className="inq-contact"><a href={r.link} target="_blank" rel="noopener noreferrer">{r.link}</a></p>}
             <p className="inq-body">{r.reason}</p>
             {r.admin_note && <p className="hint">備註：{r.admin_note}</p>}
+            {edit?.id === r.id && (
+              <form className="form" style={{ marginBottom: 12 }} onSubmit={async (e) => {
+                e.preventDefault()
+                const { error } = await supabase!.from('space_suggestions').update({ name: edit.name, city: edit.city || null, link: edit.link || null, reason: edit.reason }).eq('id', r.id)
+                setMsg(error ? { kind: 'error', text: errorText(error) } : { kind: 'ok', text: '已儲存修改。' })
+                if (!error) { setEdit(null); load() }
+              }}>
+                <div className="two">
+                  <label className="field">店名<input required maxLength={80} value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></label>
+                  <label className="field">縣市<input maxLength={20} value={edit.city ?? ''} onChange={(e) => setEdit({ ...edit, city: e.target.value })} /></label>
+                </div>
+                <label className="field">連結<input type="url" pattern="https://.*" maxLength={300} value={edit.link ?? ''} onChange={(e) => setEdit({ ...edit, link: e.target.value })} /></label>
+                <label className="field">推薦原因<textarea required minLength={10} maxLength={500} value={edit.reason} onChange={(e) => setEdit({ ...edit, reason: e.target.value })} /></label>
+                <div className="actions"><button className="btn btn-magic" type="submit">儲存</button><button className="btn btn-pill-outline" type="button" onClick={() => setEdit(null)}>取消</button></div>
+              </form>
+            )}
             <div className="actions">
+              <button type="button" className="btn btn-magic" onClick={() => onConvert({ suggestionId: r.id, name: r.name, city: r.city, link: r.link, reason: r.reason })}>建立空間並上架 →</button>
+              <button type="button" className="btn btn-pill-outline" onClick={() => setEdit(r)}>編輯</button>
               {['contacted', 'listed', 'declined'].filter((s) => s !== r.status).map((s) => (
                 <button key={s} type="button" className="btn btn-pill-outline" onClick={() => set(r, s)}>標記{SUG_STATUS[s]}</button>
               ))}
