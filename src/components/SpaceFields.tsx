@@ -68,7 +68,7 @@ export default function SpaceFields({ value, onChange }: { value: SpaceDraft; on
         <div className="two">
           <label className="field">官方網站<input type="url" pattern="https://.*" placeholder="https://" value={value.official_website} onChange={ev('official_website')} /></label>
           <label className="field">官方社群<input type="url" pattern="https://.*" placeholder="https://" value={value.official_social_url} onChange={ev('official_social_url')} /></label>
-          <label className="field">店家聯絡 Email *（不公開）<input required type="email" value={value.contact_email} onChange={ev('contact_email')} /></label>
+          <label className="field">店家聯絡 Email（選填，不公開）<input type="email" value={value.contact_email} onChange={ev('contact_email')} /></label>
         </div>
       </fieldset>
 

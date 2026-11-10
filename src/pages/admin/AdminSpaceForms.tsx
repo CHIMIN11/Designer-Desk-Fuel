@@ -78,9 +78,9 @@ export function AdminCreateSpace({ onDone, prefill }: { onDone: () => void; pref
       <fieldset>
         <legend>授權資料</legend>
         <div className="two">
-          <label className="field">店家聯絡人 *<input required maxLength={80} value={auth.applicant_name} onChange={a('applicant_name')} /></label>
-          <label className="field">職稱 *<input required maxLength={80} value={auth.applicant_position} onChange={a('applicant_position')} /></label>
-          <label className="field">聯絡人 Email *<input required type="email" value={auth.applicant_email} onChange={a('applicant_email')} /></label>
+          <label className="field">店家聯絡人（選填）<input maxLength={80} value={auth.applicant_name} onChange={a('applicant_name')} /></label>
+          <label className="field">職稱（選填）<input maxLength={80} value={auth.applicant_position} onChange={a('applicant_position')} /></label>
+          <label className="field">聯絡人 Email（選填）<input type="email" value={auth.applicant_email} onChange={a('applicant_email')} /></label>
           <label className="field">指派給店家會員帳號（選填，填會員 Email）<input type="email" value={auth.owner_email} onChange={a('owner_email')} /><span className="hint">指派後店家可在「我的刊登」管理這筆資料</span></label>
           <label className="field">授權證明（例：2026-11-10 官方 Email 確認）<input maxLength={300} value={auth.evidence_reference} onChange={a('evidence_reference')} /></label>
           <label className="field">授權到期日<input type="date" value={auth.expires_at} onChange={a('expires_at')} /></label>

@@ -455,6 +455,14 @@ describe('管理員建立與編輯空間', () => {
     const [s] = await as<{ authorization_status: string }>('superuser', 'select authorization_status from public.spaces where id = $1', [id])
     expect(s.authorization_status).toBe('pending')
     await expect(as(MEMBER, `select public.admin_create_space('{}', '{}', null)`)).rejects.toThrow(/admin only/)
+    // contacts are optional for admin-entered listings
+    const bare = space('Bare Contacts') as Record<string, unknown>
+    delete bare.contact_email
+    const [{ id: bid }] = await as<{ id: string }>(ADMIN, `select public.admin_create_space($1, $2, null) as id`, [
+      JSON.stringify(bare), JSON.stringify({ evidence_reference: 'IG 私訊同意', expires_at: new Date(Date.now() + 864e5 * 365).toISOString() }),
+    ])
+    const [ba] = await as<{ applicant_name: string; authorization_status: string }>('superuser', 'select applicant_name, authorization_status from public.space_authorizations where space_id = $1', [bid])
+    expect(ba).toEqual({ applicant_name: '未提供（管理員代填）', authorization_status: 'approved' })
     await expect(as(MERCHANT_A, `select public.admin_update_space($1, '{"opening_hours":"x"}', 'x')`, [id])).rejects.toThrow(/admin only/)
   })
 
