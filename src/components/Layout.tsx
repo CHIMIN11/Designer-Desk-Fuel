@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import Icon from './Icon'
 import JoinCTA from './JoinCTA'
+import MagicDust from './MagicDust'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 export default function Layout() {
@@ -82,6 +83,7 @@ export default function Layout() {
 
       {!['/contact', '/login', '/reset-password', '/lounge'].includes(pathname) && <JoinCTA />}
 
+      <MagicDust />
       <footer className="site-footer">
         <div className="container ft">
           <div className="ft-brand">
