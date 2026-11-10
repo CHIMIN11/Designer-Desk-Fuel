@@ -736,3 +736,31 @@ html, body { overflow-x: hidden; }
 .ab-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
 @media (max-width: 760px) { .ab-close { gap: 24px; padding: 40px 0 56px; } .ab-close img { width: 140px; } .ab-cta .btn { flex: 1 1 auto; } }
 .nw { white-space: nowrap; display: inline-block; }
+
+/* ===== Magic map ===== */
+.magic-map { display: block; width: 100%; height: auto; overflow: visible; }
+.magic-map .mm-taipei { fill: url(#mmLand); filter: brightness(1.18); }
+.magic-map .mm-label .zh { font-family: 'Noto Serif TC', serif; font-weight: 900; font-size: 17px; fill: #fff; paint-order: stroke; stroke: rgba(20,8,30,0.55); stroke-width: 3px; }
+.magic-map .mm-label .en { font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.08em; fill: #eadcf5; paint-order: stroke; stroke: rgba(20,8,30,0.55); stroke-width: 3px; }
+.magic-map .mm-pulse { transform-box: fill-box; transform-origin: center; animation: mm-pulse 2.4s ease-out infinite; }
+.magic-map .mm-star { transform-box: fill-box; transform-origin: center; animation: ring-twinkle 3s ease-in-out infinite; }
+@keyframes mm-pulse { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(3); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .magic-map .mm-pulse, .magic-map .mm-star { animation: none; } }
+.mg-map-svg { aspect-ratio: auto !important; }
+.mm-credit { margin: 10px 0 0; font-size: 11px; color: var(--muted-2); text-align: center; }
+.map-stage { border-radius: 22px; border: 1px solid #5b3577; background: radial-gradient(600px 360px at 60% 40%, #2a1440 0%, rgba(15,10,22,0) 70%), #0f0a16; padding: 24px; box-shadow: 0 0 30px rgba(155,80,200,0.2); }
+
+/* ===== Vision panel — refined ===== */
+.mg-vision { display: flex; flex-direction: column; gap: 0; padding: 30px 30px 28px; }
+.mg-vision .ab-kicker { margin-bottom: 18px; }
+.vision-title { margin: 0; font-family: 'Noto Serif TC', serif; font-weight: 900; font-size: clamp(24px, 2.1vw, 30px); line-height: 1.4; letter-spacing: 0.02em; }
+.vision-rule { display: block; width: 48px; height: 2px; margin: 22px 0 20px; background: var(--gold-grad); }
+.mg-vision p { margin: 0 0 16px; font-size: 14.5px; line-height: 1.9; color: #cfc9d9; }
+.vision-quote { margin: 4px 0 18px; padding-left: 16px; border-left: 2px solid var(--gold); font-family: 'Noto Serif TC', serif; font-size: 16px; font-weight: 700; line-height: 1.75; color: #fff; }
+.vision-strong { color: #fff; font-weight: 700; margin-right: 4px; }
+.text-link { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 10px 0 2px; font-family: 'Inter', 'Noto Sans TC', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(231,194,122,0.4); }
+.text-link:hover { color: #fff0c8; border-bottom-color: var(--gold); }
+.mg-map-body { flex-direction: column; flex-wrap: nowrap; }
+.mg-map-body .mg-map-svg { flex: none; width: 100%; }
+.mg-legend { flex: none; width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; padding: 10px 14px; border-radius: 999px; }
+@media (max-width: 760px) { .mg-legend { border-radius: 14px; } }

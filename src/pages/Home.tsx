@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
+import MagicMap from '../components/MagicMap'
 import { ReviewItem, type PublicReview } from '../components/SpaceReviews'
 import type { PublicSpace } from './Spaces'
 import { CATEGORY, CITIES } from '../lib/labels'
@@ -189,14 +190,13 @@ export default function Home() {
       {/* THREE PANELS */}
       <section className="mg-panels">
         <article className="mg-panel mg-vision">
-          <Sparkle size={30} />
-          <p className="mg-eyebrow" style={{ marginTop: 0 }}>OUR VISION</p>
-          <h2 className="serif">為設計師打造<br /><span className="gold-text">工作 × 創作 × 交流 的魔法據點</span></h2>
+          <p className="ab-kicker">Our Vision</p>
+          <h2 className="vision-title">為設計師打造<br /><span className="gold-text">工作 × 創作 × 交流</span><br />的魔法據點</h2>
+          <span className="vision-rule" aria-hidden="true" />
           <p>身為科技業的設計師，我經常在台北、桃園尋找適合工作的空間，卻總遇到插座不足、筆電電力告急、限時使用，或環境吵雜而無法專心創作。</p>
-          <p>我相信，設計師需要的不只是一張桌子，而是一個能自由工作、激發靈感、交流想法的創作基地。</p>
-          <span className="ribbon">因此，我們打造 DDF ——</span>
-          <p>串連工作空間、設計人才與創意社群，讓每位設計師都能找到創作節奏，發揮更大的魔力。</p>
-          <Link to="/about" className="mg-more">閱讀完整故事 →</Link>
+          <blockquote className="vision-quote">我相信，設計師需要的不只是一張桌子，而是一個能自由工作、激發靈感、交流想法的創作基地。</blockquote>
+          <p><strong className="vision-strong">因此，我們打造 DDF。</strong>串連工作空間、設計人才與創意社群，讓每位設計師都能找到創作節奏，發揮更大的魔力。</p>
+          <Link to="/about" className="text-link">閱讀完整故事 <Icon name="arrow" size={16} stroke={2} /></Link>
         </article>
 
         <article className="mg-panel mg-map">
@@ -208,20 +208,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mg-map-body">
-            <svg viewBox="0 0 520 300" className="mg-map-svg" role="img" aria-label="台北與桃園地區示意地圖">
-              <defs>
-                <linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#7a2e9e" stopOpacity="0.85" /><stop offset="1" stopColor="#3a1458" stopOpacity="0.9" /></linearGradient>
-              </defs>
-              <path d="M40 220 C70 180 110 160 150 150 C190 138 220 110 260 102 C300 94 330 70 360 50 C380 40 410 46 430 62 C455 82 470 105 462 130 C450 160 420 170 390 185 C350 206 300 215 250 230 C200 246 150 265 110 272 C80 276 50 255 40 220 Z" fill="url(#land)" stroke="#d35be0" strokeWidth="1.5" />
-              <g stroke="#f3d7ff" strokeOpacity="0.45" strokeWidth="0.8" fill="none">
-                <path d="M90 235 150 190 210 170 270 150 330 110 390 90 430 105" /><path d="M150 190 200 220 260 200 330 170 390 140" />
-              </g>
-              <g fill="#fff3ff">{[[90, 235], [150, 190], [210, 170], [270, 150], [330, 110], [390, 90], [430, 105], [200, 220], [260, 200], [330, 170], [390, 140]].map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r="2.4" />)}</g>
-              <g stroke="#e7c27a" strokeWidth="1.3" fill="none"><path d="M392 80V30M384 80h16M386 60h12M388 44h8M380 80h24v6h-24z" /></g>
-              <text x="412" y="56" fill="#fff" fontSize="20" fontWeight="700">台北</text><text x="412" y="74" fill="#e9e5f0" fontSize="12">Taipei</text>
-              <text x="120" y="258" fill="#fff" fontSize="20" fontWeight="700">桃園</text><text x="120" y="276" fill="#e9e5f0" fontSize="12">Taoyuan</text>
-              <g fill="#ff4fa3">{[[330, 110], [210, 170], [270, 150]].map(([x, y]) => <path key={x} d={`M${x} ${y - 16}a8 8 0 0 1 8 8c0 6-8 14-8 14s-8-8-8-14a8 8 0 0 1 8-8z`} stroke="#fff" strokeWidth="1.2" />)}</g>
-            </svg>
+            <MagicMap className="mg-map-svg" />
             <ul className="mg-legend">
               <li><Icon name="users" size={16} /> 設計師</li>
               <li><Icon name="cup" size={16} /> 工作空間</li>
@@ -230,6 +217,7 @@ export default function Home() {
             </ul>
           </div>
           <Link to="/map" className="btn btn-gold mg-map-cta">開啟魔法師地圖 →</Link>
+          <p className="mm-credit">圖資：內政部（政府資料開放授權條款）· 星座連線為示意</p>
         </article>
 
         <article className="mg-panel mg-chat" aria-label="DDF 即時聊天室">
