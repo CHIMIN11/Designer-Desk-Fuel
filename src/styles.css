@@ -1077,3 +1077,59 @@ html, body { overflow-x: hidden; }
 }
 @media (prefers-reduced-motion: reduce) { .join-spin { animation: none; } }
 .join { border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; border-bottom: 0 !important; margin: 0 !important; box-shadow: none !important; }
+
+/* ==========================================================================
+   Refinement layer — quieter, editorial, international.
+   Fewer glows, hairline borders, more whitespace, one accent per area.
+   ========================================================================== */
+:root { --hair: rgba(255,255,255,0.08); --hair-2: rgba(255,255,255,0.14); --surface: #0f0c15; --surface-2: #14101b; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+
+p { text-wrap: pretty; }
+h1, h2, h3 { text-wrap: balance; letter-spacing: 0.01em; }
+
+/* Panels & cards: hairline, no neon glow */
+.mg-panel { border-color: var(--hair-2); box-shadow: none; background: radial-gradient(520px 300px at 0% 0%, rgba(124,58,180,0.16), transparent 70%), var(--surface); border-radius: 24px; padding: 32px; }
+.mg-panel.mg-chat { box-shadow: 0 24px 60px rgba(0,0,0,0.35); }
+.mg-pick { border-color: var(--hair); box-shadow: none; background: var(--surface); border-radius: 18px; transition: transform .3s ease, border-color .3s; }
+.mg-pick:hover { transform: translateY(-3px); border-color: var(--hair-2); }
+.mg-pick .body { padding: 16px 18px 18px; }
+.mg-pick h3 { font-weight: 800; letter-spacing: .01em; }
+.mg-pick .tags span { background: transparent; border-color: var(--hair-2); color: #d9d3e3; font-weight: 500; }
+.card { border-color: var(--hair); box-shadow: none; }
+.join-card, .plan-card { border-color: var(--hair-2); }
+.review-card, .mg-review-list > * { border-color: var(--hair) !important; box-shadow: none !important; }
+
+/* Section rhythm & editorial headings */
+.mg-section { padding-top: 56px; padding-bottom: 40px; }
+.mg-sec-head { align-items: flex-end; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--hair); }
+.mg-sec-head h2 { font-size: clamp(24px, 2.2vw, 32px); font-weight: 900; letter-spacing: .02em; }
+.sec-kicker { margin: 0 0 8px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--gold); }
+.mg-sec-head a { font-size: 14px; font-weight: 600; color: #e9e4f1; letter-spacing: .02em; }
+.mg-sec-head a:hover { color: var(--gold); }
+.ab-kicker { letter-spacing: .28em; font-weight: 600; }
+
+/* Buttons: one strong primary, everything else quiet */
+.btn { letter-spacing: .02em; transition: background .2s, border-color .2s, color .2s, transform .2s; }
+.btn-magic, .btn-pink { box-shadow: 0 8px 24px rgba(226,53,127,0.22); }
+.btn-magic:hover, .btn-pink:hover { transform: translateY(-1px); }
+.btn-pill-outline, .btn-ghost { border-color: var(--hair-2); }
+.btn-pill-outline:hover, .btn-ghost:hover { border-color: rgba(255,255,255,0.35); }
+
+/* Demo notices: calmer */
+.demo-note { background: transparent !important; border: 1px dashed rgba(231,194,122,0.35) !important; color: #cdbf9e !important; font-size: 12px; }
+
+/* Footer: no underlines, quiet links */
+.site-footer a { text-decoration: none; color: #cfc9d9; transition: color .2s; }
+.site-footer a:hover { color: var(--gold); }
+.site-footer { border-top: 1px solid var(--hair); }
+
+/* Join band: softer */
+.join { background: radial-gradient(60% 80% at 85% 50%, rgba(124,58,180,0.22), transparent 70%), #0b0812; }
+.join-card { background: rgba(20,16,27,0.8); }
+.join-card .t { font-weight: 700; }
+
+/* Inputs */
+input, select, textarea { transition: border-color .2s, box-shadow .2s; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--gold) !important; box-shadow: 0 0 0 3px rgba(231,194,122,0.18); }
+.mg-panel.mg-chat { padding: 0; overflow: hidden; border-color: var(--hair-2); }

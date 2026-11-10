@@ -254,7 +254,7 @@ export default function Home() {
       {/* PICKS */}
       <section className="mg-section" aria-labelledby="picks-title">
         <div className="mg-sec-head">
-          <h2 id="picks-title" className="serif"><Sparkle size={16} color="#e7c27a" /> 設計師精選空間 <small>Designers’ Pick</small></h2>
+          <div><p className="sec-kicker">Designers’ Pick</p><h2 id="picks-title" className="serif">設計師精選空間</h2></div>
           <Link to="/spaces">查看更多空間 →</Link>
         </div>
         {demoSpaces && <p className="demo-note">DEMO 示意：以下店家、照片與評分皆為版面示意，並非真實店家，正式上線前移除。</p>}
@@ -292,7 +292,7 @@ export default function Home() {
       {/* REVIEWS */}
       <section className="mg-section" aria-labelledby="reviews-title">
         <div className="mg-sec-head">
-          <h2 id="reviews-title" className="serif"><Sparkle size={16} color="#e7c27a" /> 設計師真實評價 <small>Real Reviews by Designers</small></h2>
+          <div><p className="sec-kicker">Real Reviews</p><h2 id="reviews-title" className="serif">設計師真實評價</h2></div>
           <Link to="/reviews">看全部評價 →</Link>
         </div>
         {demoReviews && <p className="demo-note">DEMO 示意：以下評價與人物為版面示意，並非真實會員評價，正式上線前移除。</p>}
