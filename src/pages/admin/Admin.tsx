@@ -6,7 +6,7 @@ import { errorText, supabase } from '../../lib/supabase'
 import { AdminCreateSpace, AdminEditSpace } from './AdminSpaceForms'
 import AdminMembers from './AdminMembers'
 import { ReviewPhotos } from '../../components/SpaceReviews'
-import { AdminBanners, AdminChatReports, AdminInquiries } from './AdminExtras'
+import { AdminBanners, AdminChatReports, AdminInquiries, AdminSuggestions } from './AdminExtras'
 
 type Space = {
   id: string; business_name: string; address: string; city: string; district: string | null; category: string
@@ -27,7 +27,7 @@ type Audit = { id: number; actor_id: string | null; actor_role: string; action: 
 /** Admin sections grouped by job: listing review, members & community, marketing, system. */
 const GROUPS = [
   { id: 'review', label: '空間審查', en: 'Space Review', tabs: [
-    ['applications', '申請審核'], ['publication', '上架管理'], ['assets', '素材授權'], ['updates', '資料更新'], ['create', '新增空間'],
+    ['applications', '申請審核'], ['suggestions', '會員推薦'], ['publication', '上架管理'], ['assets', '素材授權'], ['updates', '資料更新'], ['create', '新增空間'],
   ] },
   { id: 'members', label: '會員與社群', en: 'Members & Community', tabs: [
     ['members', '會員管理'], ['reviews', '評價管理'], ['chat', '聊天檢舉'],
@@ -189,6 +189,8 @@ export default function Admin() {
       {tab === 'banners' && <AdminBanners />}
 
       {tab === 'inquiries' && <AdminInquiries />}
+
+      {tab === 'suggestions' && <AdminSuggestions />}
 
       {tab === 'publication' && editSpace && (
         <AdminEditSpace row={editSpace} onClose={(changed) => { setEditSpace(null); if (changed) { setMsg({ kind: 'ok', text: '已更新空間資料並寫入稽核紀錄。' }); load() } }} />

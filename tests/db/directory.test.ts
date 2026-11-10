@@ -610,3 +610,21 @@ describe('聯絡我們／合作方案', () => {
   })
 })
 
+describe('會員推薦空間', () => {
+  const add = (who: string, name = '光合作用咖啡') =>
+    as(who, `insert into public.space_suggestions (name, city, reason) values ($1, '臺北市', '插座很多又安靜，很適合畫圖')`, [name])
+  it('members suggest; only own + admin can read; limited to 5 per day; anon blocked', async () => {
+    await add(MEMBER)
+    await expect(add('anon')).rejects.toThrow(/permission denied/)
+    expect(await as(MEMBER, 'select * from public.space_suggestions')).toHaveLength(1)
+    expect(await as(MERCHANT_B, 'select * from public.space_suggestions')).toHaveLength(0)
+    const rows = await as<{ id: string }>(ADMIN, 'select * from public.space_suggestions')
+    expect(rows).toHaveLength(1)
+    await as(ADMIN, `update public.space_suggestions set status = 'contacted' where id = $1`, [rows[0].id])
+    await as(MEMBER, `update public.space_suggestions set status = 'listed'`)
+    expect((await as<{ status: string }>(ADMIN, 'select status from public.space_suggestions'))[0].status).toBe('contacted')
+    for (let i = 0; i < 4; i++) await add(MEMBER, `店 ${i}`)
+    await expect(add(MEMBER, '第六家')).rejects.toThrow(/too many suggestions/)
+  })
+})
+

@@ -310,3 +310,48 @@ export function AdminInquiries() {
     </div>
   )
 }
+
+type Suggestion = { id: string; name: string; city: string | null; link: string | null; reason: string; status: string; admin_note: string | null; created_at: string }
+const SUG_STATUS: Record<string, string> = { new: '新推薦', contacted: '洽談中', listed: '已上架', declined: '店家婉拒' }
+
+/** Member suggestions: leads to contact businesses for authorization. Never auto-published. */
+export function AdminSuggestions() {
+  const [rows, setRows] = useState<Suggestion[]>([])
+  const [msg, setMsg] = useState<Msg>(null)
+  const load = useCallback(async () => {
+    const { data, error } = await supabase!.from('space_suggestions').select('*').order('created_at', { ascending: false }).limit(300)
+    if (error) setMsg({ kind: 'error', text: errorText(error) })
+    setRows((data ?? []) as Suggestion[])
+  }, [])
+  useEffect(() => { load() }, [load])
+  const set = async (r: Suggestion, status: string) => {
+    const note = window.prompt('備註（選填，例如聯繫方式、店家回覆）', r.admin_note ?? '')
+    if (note === null) return
+    const { error } = await supabase!.from('space_suggestions').update({ status, admin_note: note || null }).eq('id', r.id)
+    setMsg(error ? { kind: 'error', text: errorText(error) } : { kind: 'ok', text: '已更新。' })
+    load()
+  }
+  return (
+    <div>
+      <p className="notice notice-info">會員推薦的空間只是聯繫名單，不會自動上架。取得店家同意後，到「新增空間」建立並填寫授權證明，再把這裡標成「已上架」。</p>
+      {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
+      {rows.length === 0 && <p className="card">還沒有會員推薦。</p>}
+      <div className="inq-list">
+        {rows.map((r) => (
+          <article key={r.id} className="card inq">
+            <p className="inq-meta"><span className="badge badge-muted">{SUG_STATUS[r.status]}</span> {formatDate(r.created_at)}{r.city && ` · ${r.city}`}</p>
+            <h3>{r.name}</h3>
+            {r.link && <p className="inq-contact"><a href={r.link} target="_blank" rel="noopener noreferrer">{r.link}</a></p>}
+            <p className="inq-body">{r.reason}</p>
+            {r.admin_note && <p className="hint">備註：{r.admin_note}</p>}
+            <div className="actions">
+              {['contacted', 'listed', 'declined'].filter((s) => s !== r.status).map((s) => (
+                <button key={s} type="button" className="btn btn-pill-outline" onClick={() => set(r, s)}>標記{SUG_STATUS[s]}</button>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  )
+}
