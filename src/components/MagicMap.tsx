@@ -1,6 +1,6 @@
 import { COUNTY_LABELS, COUNTY_PATHS, MAP_H, MAP_W, NODES } from '../lib/mapData'
 
-/** Constellation links between district centres (illustrative network, not routes). */
+/** Constellation links between hotspots (decorative, not routes). */
 const EDGES: [string, string][] = [
   ['桃園市中壢區', '桃園市八德區'], ['桃園市八德區', '桃園市桃園區'], ['桃園市桃園區', '桃園市龜山區'],
   ['桃園市大園區', '桃園市蘆竹區'], ['桃園市蘆竹區', '桃園市桃園區'], ['桃園市蘆竹區', '桃園市龜山區'],
@@ -16,10 +16,10 @@ const HOTSPOTS = ['台北市信義區', '台北市中山區', '新北市板橋�
 const PINS = ['台北市士林區', '新北市板橋區', '桃園市中壢區']
 
 const LABELS: { key: string; zh: string; en: string; dx: number; dy: number }[] = [
-  { key: '台北市', zh: '臺北市', en: '', dx: 30, dy: -40 },
-  { key: '新北市', zh: '新北市', en: '', dx: -10, dy: 60 },
-  { key: '桃園市', zh: '桃園市', en: '', dx: -44, dy: 42 },
-  { key: '基隆市', zh: '基隆市', en: '', dx: 14, dy: -20 },
+  { key: '台北市', zh: '臺北市', en: '', dx: 0, dy: 0 },
+  { key: '新北市', zh: '新北市', en: '', dx: 0, dy: 0 },
+  { key: '桃園市', zh: '桃園市', en: '', dx: 0, dy: 0 },
+  { key: '基隆市', zh: '基隆市', en: '', dx: 0, dy: 0 },
 ]
 
 const STARS: [number, number, number][] = [[60, 60, 9], [500, 300, 7], [450, 40, 6], [110, 330, 6], [250, 60, 5]]
@@ -103,7 +103,7 @@ export default function MagicMap({ className = '' }: { className?: string }) {
       {LABELS.map(({ key, zh, en, dx, dy }) => {
         const [x, y] = COUNTY_LABELS[key]
         return (
-          <g key={key} transform={`translate(${x + dx} ${y + dy})`} className="mm-label">
+          <g key={key} transform={`translate(${x + dx} ${y + dy})`} className="mm-label" textAnchor="middle">
             <text className="zh">{zh}</text>
             {en && <text className="en" y="14">{en}</text>}
           </g>
