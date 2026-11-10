@@ -1036,3 +1036,6 @@ html, body { overflow-x: hidden; }
   .bnr-count b { font-size: 14px; }
   .bnr-bars button { width: 22px; }
 }
+.site-footer .copyright { flex-basis: 100%; margin: 14px 0 0; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted-2); letter-spacing: .02em; }
+.site-footer .copyright span { color: var(--gold); letter-spacing: .08em; }
+.map-credit { margin: 8px 0 0; font-size: 11px; color: var(--muted-2); text-align: right; }

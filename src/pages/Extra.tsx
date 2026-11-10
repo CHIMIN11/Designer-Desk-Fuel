@@ -116,6 +116,7 @@ export function MapPage() {
       <h1>魔法師地圖</h1>
       <p className="lead">發現附近的設計師、工作空間與活動。互動地圖開發中，目前可先用「探索空間」依地區搜尋已授權刊登的空間。</p>
       <div className="map-stage"><MagicMap /></div>
+      <p className="map-credit">地圖資料：內政部，依政府資料開放授權條款使用。</p>
       <div className="actions" style={{ marginTop: 20 }}>
         <Link to="/spaces" className="btn btn-magic">探索空間</Link>
         <span className="badge badge-muted" style={{ alignSelf: 'center' }}>互動地圖即將推出</span>
