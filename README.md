@@ -1,6 +1,8 @@
 # DDF — Designer Desk Fuel
 
-設計師的工作空間 × 創意據點。**Find Your Space. Fuel Your Magic.**
+設計師的工作 × 創意據點。**Find Your Space. Fuel Your Magic.**
+
+🌐 正式網站：https://designer-desk-fuel.vercel.app （Vercel，push 到 `main` 自動部署）
 
 DDF 是一個 **Workspace Directory**：只刊登經店家授權、並經管理員核對資料後公開的工作空間資訊。不做推薦、星級或排名。
 
