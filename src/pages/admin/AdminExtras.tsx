@@ -420,3 +420,131 @@ export function AdminNotes({ onConvert }: { onConvert: (p: { suggestionId: strin
     </div>
   )
 }
+
+type NewsAdmin = { id: string; title: string; summary: string | null; body: string; category: string; cover_url: string | null; link_url: string | null; link_label: string | null; is_published: boolean; pinned: boolean; published_at: string }
+const NEWS_CAT_LABELS: Record<string, string> = { announcement: '公告', event: '活動', partnership: '合作', update: '網站更新' }
+const blankNews = { title: '', summary: '', body: '', category: 'announcement', link_url: '', link_label: '', published_at: '', is_published: true, pinned: false }
+
+/** Write, edit, publish/unpublish and pin news posts. */
+export function AdminNews() {
+  const [rows, setRows] = useState<NewsAdmin[]>([])
+  const [f, setF] = useState(blankNews)
+  const [cover, setCover] = useState<string | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [editing, setEditing] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState<Msg>(null)
+  const load = useCallback(async () => {
+    const { data, error } = await supabase!.from('site_news').select('*').order('published_at', { ascending: false }).limit(200)
+    if (error) setMsg({ kind: 'error', text: errorText(error) })
+    setRows((data ?? []) as NewsAdmin[])
+  }, [])
+  useEffect(() => { load() }, [load])
+  const reset = () => { setF(blankNews); setCover(null); setFiles([]); setEditing(null) }
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    setMsg(null)
+    try {
+      let cover_url = cover
+      if (files[0]) {
+        const file = files[0]
+        const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
+        const path = `news/${crypto.randomUUID()}.${ext}`
+        const bucket = supabase!.storage.from('site-banners')
+        const up = await bucket.upload(path, file, { contentType: file.type })
+        if (up.error) throw up.error
+        cover_url = bucket.getPublicUrl(path).data.publicUrl
+      }
+      const row = {
+        title: f.title.trim(), summary: f.summary.trim() || null, body: f.body.trim(), category: f.category,
+        link_url: f.link_url.trim() || null, link_label: f.link_label.trim() || null, cover_url,
+        is_published: f.is_published, pinned: f.pinned,
+        published_at: f.published_at ? new Date(f.published_at).toISOString() : new Date().toISOString(),
+      }
+      const { error } = editing ? await supabase!.from('site_news').update(row).eq('id', editing) : await supabase!.from('site_news').insert(row)
+      if (error) throw error
+      setMsg({ kind: 'ok', text: editing ? '已更新消息。' : f.is_published ? '已發布！首頁與「最新消息」頁會顯示。' : '已存成草稿。' })
+      reset()
+      load()
+    } catch (err) {
+      setMsg({ kind: 'error', text: errorText(err) })
+    }
+    setBusy(false)
+  }
+  const edit = (n: NewsAdmin) => {
+    setEditing(n.id)
+    setF({ title: n.title, summary: n.summary ?? '', body: n.body, category: n.category, link_url: n.link_url ?? '', link_label: n.link_label ?? '',
+      published_at: toLocal(n.published_at), is_published: n.is_published, pinned: n.pinned })
+    setCover(n.cover_url)
+    setFiles([])
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const quick = async (n: NewsAdmin, patch: Partial<NewsAdmin>) => {
+    const { error } = await supabase!.from('site_news').update(patch).eq('id', n.id)
+    setMsg(error ? { kind: 'error', text: errorText(error) } : { kind: 'ok', text: '已更新。' })
+    load()
+  }
+  const remove = async (n: NewsAdmin) => {
+    if (!window.confirm(`確定刪除「${n.title}」？`)) return
+    const { error } = await supabase!.from('site_news').delete().eq('id', n.id)
+    setMsg(error ? { kind: 'error', text: errorText(error) } : { kind: 'ok', text: '已刪除。' })
+    load()
+  }
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value })
+
+  return (
+    <div>
+      <form className="form admin-form admin-edit card" onSubmit={save} style={{ marginBottom: 24 }}>
+        <h2 style={{ margin: 0, fontSize: 20 }}>{editing ? '編輯消息' : '發布新消息'}</h2>
+        <div className="two">
+          <label className="field">標題 *<input required maxLength={80} value={f.title} onChange={set('title')} placeholder="例：DDF 第一場「一起工作日」開放報名" /></label>
+          <label className="field">分類
+            <select value={f.category} onChange={set('category')}>{Object.entries(NEWS_CAT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+          </label>
+        </div>
+        <label className="field">摘要（列表上顯示，160 字內）<input maxLength={160} value={f.summary} onChange={set('summary')} /></label>
+        <label className="field">內文 *（空一行會分段）<textarea required maxLength={8000} rows={8} value={f.body} onChange={set('body')} /></label>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          {cover && <div><img src={cover} alt="" style={{ width: 200, aspectRatio: '16 / 9', objectFit: 'cover', borderRadius: 10 }} /><br /><button type="button" className="btn btn-ghost" onClick={() => setCover(null)}>移除封面</button></div>}
+          <div style={{ flex: 1, minWidth: 220 }}><ImagePicker label={cover ? '更換封面圖（選填）' : '封面圖（選填，建議 16:9）'} max={1} files={files} onChange={setFiles} /></div>
+        </div>
+        <div className="two">
+          <label className="field">按鈕連結（選填，站內 / 或 https://）<input pattern="(https://|/).*" value={f.link_url} onChange={set('link_url')} placeholder="/contact 或 https://…" /></label>
+          <label className="field">按鈕文字<input maxLength={20} value={f.link_label} onChange={set('link_label')} placeholder="立即報名" /></label>
+          <label className="field">發布時間（留空＝現在；填未來時間會排程）<input type="datetime-local" value={f.published_at} onChange={set('published_at')} /></label>
+        </div>
+        <label className="check"><input type="checkbox" checked={f.is_published} onChange={(e) => setF({ ...f, is_published: e.target.checked })} /> 公開（不勾＝草稿）</label>
+        <label className="check"><input type="checkbox" checked={f.pinned} onChange={(e) => setF({ ...f, pinned: e.target.checked })} /> 置頂</label>
+        {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
+        <div className="actions">
+          <button className="btn btn-magic" type="submit" disabled={busy}>{busy ? '儲存中…' : editing ? '儲存修改' : f.is_published ? '發布' : '存成草稿'}</button>
+          {editing && <button className="btn btn-pill-outline" type="button" onClick={reset}>取消編輯</button>}
+        </div>
+      </form>
+      <div className="table-wrap">
+        <table>
+          <thead><tr><th>標題</th><th>分類</th><th>發布時間</th><th>狀態</th><th>操作</th></tr></thead>
+          <tbody>
+            {rows.length === 0 && <tr><td colSpan={5}>還沒有消息。</td></tr>}
+            {rows.map((n) => (
+              <tr key={n.id}>
+                <td><b>{n.title}</b>{n.pinned && <small> · 置頂</small>}</td>
+                <td>{NEWS_CAT_LABELS[n.category]}</td>
+                <td>{formatDate(n.published_at)}</td>
+                <td>{n.is_published ? (new Date(n.published_at) > new Date() ? '已排程' : '公開中') : '草稿'}</td>
+                <td className="actions">
+                  <button className="btn btn-primary" type="button" onClick={() => edit(n)}>編輯</button>
+                  <button className="btn btn-pill-outline" type="button" onClick={() => quick(n, { is_published: !n.is_published })}>{n.is_published ? '下架' : '發布'}</button>
+                  <button className="btn btn-pill-outline" type="button" onClick={() => quick(n, { pinned: !n.pinned })}>{n.pinned ? '取消置頂' : '置頂'}</button>
+                  <button className="btn btn-danger" type="button" onClick={() => remove(n)}>刪除</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}

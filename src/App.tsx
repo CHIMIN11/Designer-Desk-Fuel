@@ -8,6 +8,7 @@ import MySpaces from './pages/MySpaces'
 import Account from './pages/Account'
 import Lounge from './pages/Lounge'
 import Contact from './pages/Contact'
+import News, { NewsDetail } from './pages/News'
 import Login from './pages/Login'
 import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/admin/Admin'
@@ -29,6 +30,8 @@ export default function App() {
         <Route path="community" element={<Community />} />
         <Route path="partners" element={<Partners />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="news" element={<News />} />
+        <Route path="news/:id" element={<NewsDetail />} />
         <Route path="map" element={<MapPage />} />
         <Route path="resources" element={<ComingSoon title="創作資源" en="Creative Resources" text="設計工具、素材與學習資源整理，籌備中。" to="/" cta="回首頁" />} />
         <Route path="lounge" element={<Lounge />} />

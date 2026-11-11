@@ -656,3 +656,12 @@ describe('私房據點筆記', () => {
   })
 })
 
+describe('最新消息', () => {
+  it('public sees only published news; only admins write', async () => {
+    await as(ADMIN, `insert into public.site_news (title, body, is_published) values ('DDF 上線', '歡迎加入', true), ('草稿', '未發布', false)`)
+    expect(await as('anon', 'select title from public.site_news')).toEqual([{ title: 'DDF 上線' }])
+    await expect(as(MEMBER, `insert into public.site_news (title, body) values ('x', 'y')`)).rejects.toThrow(/row-level security/)
+    await expect(as('anon', `insert into public.site_news (title, body) values ('x', 'y')`)).rejects.toThrow(/permission denied/)
+  })
+})
+

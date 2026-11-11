@@ -96,6 +96,7 @@ export default function Layout() {
             <Link to="/spaces">探索空間</Link>
             <Link to="/spaces?events=1">活動與講座</Link>
             <Link to="/map">魔法師地圖</Link>
+            <Link to="/news">最新消息</Link>
             <Link to="/community">設計師社群</Link>
             <Link to="/about">關於 DDF</Link>
           </nav>

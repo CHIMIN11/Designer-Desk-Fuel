@@ -1,3 +1,4 @@
+import { NewsStrip } from './News'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
@@ -250,6 +251,8 @@ export default function Home() {
           </div>
         </article>
       </section>
+
+      <NewsStrip />
 
       {/* PICKS */}
       <section className="mg-section" aria-labelledby="picks-title">

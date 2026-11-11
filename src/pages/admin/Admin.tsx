@@ -6,7 +6,7 @@ import { errorText, supabase } from '../../lib/supabase'
 import { AdminCreateSpace, AdminEditSpace, type SpacePrefill } from './AdminSpaceForms'
 import AdminMembers from './AdminMembers'
 import { ReviewPhotos } from '../../components/SpaceReviews'
-import { AdminBanners, AdminChatReports, AdminInquiries, AdminNotes, AdminSuggestions } from './AdminExtras'
+import { AdminBanners, AdminChatReports, AdminInquiries, AdminNews, AdminNotes, AdminSuggestions } from './AdminExtras'
 
 type Space = {
   id: string; business_name: string; address: string; city: string; district: string | null; category: string
@@ -33,7 +33,7 @@ const GROUPS = [
     ['members', '會員管理'], ['reviews', '評價管理'], ['notes', '私房據點'], ['chat', '聊天檢舉'],
   ] },
   { id: 'marketing', label: '行銷', en: 'Marketing', tabs: [
-    ['banners', 'Banner 管理'], ['inquiries', '合作洽詢'],
+    ['news', '最新消息'], ['banners', 'Banner 管理'], ['inquiries', '合作洽詢'],
   ] },
   { id: 'system', label: '系統', en: 'System', tabs: [
     ['audit', '稽核紀錄'],
@@ -186,6 +186,8 @@ export default function Admin() {
       {tab === 'members' && <AdminMembers />}
 
       {tab === 'chat' && <AdminChatReports />}
+
+      {tab === 'news' && <AdminNews />}
 
       {tab === 'banners' && <AdminBanners />}
 
