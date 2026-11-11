@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import ImagePicker from '../../components/ImagePicker'
+import { ReviewPhotos } from '../../components/SpaceReviews'
 import { formatDate } from '../../lib/labels'
 import { errorText, supabase } from '../../lib/supabase'
 
@@ -367,6 +368,51 @@ export function AdminSuggestions({ onConvert }: { onConvert: (p: { suggestionId:
               {['contacted', 'listed', 'declined'].filter((s) => s !== r.status).map((s) => (
                 <button key={s} type="button" className="btn btn-pill-outline" onClick={() => set(r, s)}>標記{SUG_STATUS[s]}</button>
               ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+type AdminNote = { id: string; place_name: string; city: string | null; district: string | null; map_link: string | null; body: string; photo_urls: string[]; status: string; created_at: string }
+
+/** Moderate member pocket picks; optionally turn one into a listing after the business agrees. */
+export function AdminNotes({ onConvert }: { onConvert: (p: { suggestionId: string; name: string; city: string | null; link: string | null; reason: string }) => void }) {
+  const [rows, setRows] = useState<AdminNote[]>([])
+  const [msg, setMsg] = useState<Msg>(null)
+  const load = useCallback(async () => {
+    const { data, error } = await supabase!.from('place_notes').select('*').order('created_at', { ascending: false }).limit(300)
+    if (error) setMsg({ kind: 'error', text: errorText(error) })
+    setRows((data ?? []) as AdminNote[])
+  }, [])
+  useEffect(() => { load() }, [load])
+  const setStatus = async (n: AdminNote, status: string) => {
+    const reason = status === 'hidden' ? window.prompt('隱藏原因（例：店家要求移除、內容不實）') : '恢復顯示'
+    if (!reason) return
+    const { error } = await supabase!.rpc('admin_set_note_status', { p_note_id: n.id, p_status: status, p_reason: reason })
+    setMsg(error ? { kind: 'error', text: errorText(error) } : { kind: 'ok', text: '已更新。' })
+    load()
+  }
+  return (
+    <div>
+      <p className="notice notice-info">會員分享的私房據點是個人心得，不需店家授權，公開時會標示「會員親身心得・非店家刊登資訊」。店家要求移除或內容不實時請隱藏。若店家同意正式刊登，可按「建立空間並上架」。</p>
+      {msg && <p className={`notice notice-${msg.kind === 'ok' ? 'ok' : 'error'}`} role="status">{msg.text}</p>}
+      {rows.length === 0 && <p className="card">還沒有私房據點。</p>}
+      <div className="inq-list">
+        {rows.map((n) => (
+          <article key={n.id} className="card inq">
+            <p className="inq-meta"><span className="badge badge-muted">{n.status === 'visible' ? '公開中' : '已隱藏'}</span> {formatDate(n.created_at)}{n.city && ` · ${n.city}`}{n.district && ` ${n.district}`}</p>
+            <h3>{n.place_name}</h3>
+            {n.map_link && <p className="inq-contact"><a href={n.map_link} target="_blank" rel="noopener noreferrer">{n.map_link}</a></p>}
+            <p className="inq-body">{n.body}</p>
+            {n.photo_urls.length > 0 && <ReviewPhotos urls={n.photo_urls} />}
+            <div className="actions">
+              <button type="button" className="btn btn-pill-outline" onClick={() => onConvert({ suggestionId: '', name: n.place_name, city: n.city, link: n.map_link, reason: n.body })}>建立空間並上架 →</button>
+              {n.status === 'visible'
+                ? <button type="button" className="btn btn-danger" onClick={() => setStatus(n, 'hidden')}>隱藏</button>
+                : <button type="button" className="btn btn-pill-outline" onClick={() => setStatus(n, 'visible')}>恢復顯示</button>}
             </div>
           </article>
         ))}

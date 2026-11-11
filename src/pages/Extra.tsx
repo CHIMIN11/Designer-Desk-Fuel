@@ -1,3 +1,4 @@
+import { PlaceNotesList } from '../components/PlaceNotes'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '../components/Icon'
@@ -18,6 +19,7 @@ export function Reviews() {
       {!supabase && <p className="notice notice-warn">尚未連接 Supabase。</p>}
       {rows && rows.length === 0 && <div className="card">還沒有評價。到 <Link to="/spaces">探索空間</Link> 找到你去過的地方，分享你的經驗。</div>}
       {rows && rows.length > 0 && <ul className="review-list">{rows.map((r) => <ReviewItem key={r.id} r={r} showSpace />)}</ul>}
+      {supabase && <PlaceNotesList />}
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { useAuth } from '../lib/auth'
 import { formatDate } from '../lib/labels'
 import { errorText, supabase } from '../lib/supabase'
 import Icon from '../components/Icon'
-import SuggestSpace from '../components/SuggestSpace'
+import { PlaceNoteDesk } from '../components/PlaceNotes'
 import { PROFESSIONS, REGIONS, SelectOrOther, SkillPicker } from '../components/ProfilePickers'
 import ImagePicker from '../components/ImagePicker'
 import { PHOTO_NOTE, REVIEW_TAGS, ReviewPhotos } from '../components/SpaceReviews'
@@ -164,7 +164,7 @@ function ReviewDesk({ uid }: { uid: string }) {
 
   return (
     <div className="review-desk">
-      {!editing && spaces.length === 0 ? <SuggestSpace empty /> : (
+      {!editing && spaces.length === 0 ? null : (
       <form className="form card" onSubmit={submit}>
         <h2 style={{ margin: 0, fontSize: 20 }}>{editing ? '修改評價' : '撰寫評價'}</h2>
         {editing ? (
@@ -211,7 +211,7 @@ function ReviewDesk({ uid }: { uid: string }) {
         </div>
       </form>
       )}
-      {spaces.length > 0 && !editing && <SuggestSpace empty={false} />}
+      {!editing && <PlaceNoteDesk />}
 
       <h2 style={{ fontSize: 20, margin: '32px 0 12px' }}>我的評價（{mine.length}）</h2>
       {mine.length === 0 && <p style={{ color: 'var(--muted)' }}>你還沒有發表評價。</p>}

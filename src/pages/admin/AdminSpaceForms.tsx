@@ -73,7 +73,7 @@ export function AdminCreateSpace({ onDone, prefill }: { onDone: () => void; pref
       <p className="notice notice-info" style={{ margin: 0 }}>
         用於店家已透過 Email、電話或當面授權，由管理員代為建立資料。授權證明與到期日都填寫時會直接核准授權；仍需「核對資料」後才能上架。
       </p>
-      {prefill && <p className="notice notice-ok" style={{ margin: 0 }}>由會員推薦帶入：{prefill.name}。推薦原因：「{prefill.reason}」（僅供參考，不會公開）</p>}
+      {prefill && <p className="notice notice-ok" style={{ margin: 0 }}>由會員分享帶入：{prefill.name}。原文：「{prefill.reason}」（僅供參考，不會公開）</p>}
       <SpaceFields value={draft} onChange={setDraft} />
       <fieldset>
         <legend>授權資料</legend>

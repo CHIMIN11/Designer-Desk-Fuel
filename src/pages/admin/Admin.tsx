@@ -6,7 +6,7 @@ import { errorText, supabase } from '../../lib/supabase'
 import { AdminCreateSpace, AdminEditSpace, type SpacePrefill } from './AdminSpaceForms'
 import AdminMembers from './AdminMembers'
 import { ReviewPhotos } from '../../components/SpaceReviews'
-import { AdminBanners, AdminChatReports, AdminInquiries, AdminSuggestions } from './AdminExtras'
+import { AdminBanners, AdminChatReports, AdminInquiries, AdminNotes, AdminSuggestions } from './AdminExtras'
 
 type Space = {
   id: string; business_name: string; address: string; city: string; district: string | null; category: string
@@ -30,7 +30,7 @@ const GROUPS = [
     ['applications', '申請審核'], ['suggestions', '會員推薦'], ['publication', '上架管理'], ['assets', '素材授權'], ['updates', '資料更新'], ['create', '新增空間'],
   ] },
   { id: 'members', label: '會員與社群', en: 'Members & Community', tabs: [
-    ['members', '會員管理'], ['reviews', '評價管理'], ['chat', '聊天檢舉'],
+    ['members', '會員管理'], ['reviews', '評價管理'], ['notes', '私房據點'], ['chat', '聊天檢舉'],
   ] },
   { id: 'marketing', label: '行銷', en: 'Marketing', tabs: [
     ['banners', 'Banner 管理'], ['inquiries', '合作洽詢'],
@@ -181,7 +181,7 @@ export default function Admin() {
         </div>
       )}
 
-      {tab === 'create' && <AdminCreateSpace key={prefill?.suggestionId ?? 'blank'} prefill={prefill} onDone={() => { setPrefill(null); load() }} />}
+      {tab === 'create' && <AdminCreateSpace key={prefill ? `${prefill.suggestionId}-${prefill.name}` : 'blank'} prefill={prefill} onDone={() => { setPrefill(null); load() }} />}
 
       {tab === 'members' && <AdminMembers />}
 
@@ -190,6 +190,8 @@ export default function Admin() {
       {tab === 'banners' && <AdminBanners />}
 
       {tab === 'inquiries' && <AdminInquiries />}
+
+      {tab === 'notes' && <AdminNotes onConvert={(p) => { setPrefill(p); setTab('create') }} />}
 
       {tab === 'suggestions' && <AdminSuggestions onConvert={(p) => { setPrefill(p); setTab('create') }} />}
 

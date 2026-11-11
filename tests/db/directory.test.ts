@@ -636,3 +636,23 @@ describe('會員推薦空間', () => {
   })
 })
 
+describe('私房據點筆記', () => {
+  const url = (owner: string) => `https://x.supabase.co/storage/v1/object/public/review-photos/${owner}/n.jpg`
+  const add = (who: string, name = '鶯歌老街咖啡') =>
+    as<{ id: string }>(who, `insert into public.place_notes (place_name, city, body, tags, photo_urls) values ($1, '新北市', '窗邊有插座，下午很安靜，適合畫插畫兩三個小時。', '{power_ok}', $2) returning id`, [name, [url(who)]])
+  it('members post own notes without authorization; public sees visible ones; admin can hide', async () => {
+    const [{ id }] = await add(MEMBER)
+    expect(await as('anon', 'select * from public.list_place_notes(10)')).toHaveLength(1)
+    await expect(as('anon', 'select * from public.place_notes')).rejects.toThrow(/permission denied/)
+    await expect(as(MEMBER, `insert into public.place_notes (place_name, body, photo_urls) values ('x', '這是一段超過二十個字的使用心得內容內容內容', $1)`, [[url(MERCHANT_B)]])).rejects.toThrow(/uploaded by the author/)
+    await expect(as(MEMBER, `update public.place_notes set status = 'hidden' where id = $1`, [id])).rejects.toThrow(/permission denied/)
+    await expect(as(MEMBER, `select public.admin_set_note_status($1, 'hidden', 'x')`, [id])).rejects.toThrow(/admin only/)
+    await as(ADMIN, `select public.admin_set_note_status($1, 'hidden', '店家要求移除')`, [id])
+    expect(await as('anon', 'select * from public.list_place_notes(10)')).toHaveLength(0)
+    // others cannot edit someone else's note
+    await as(MERCHANT_B, `update public.place_notes set body = '被改掉的內容被改掉的內容被改掉的內容' where id = $1`, [id])
+    const [n] = await as<{ body: string }>(ADMIN, 'select body from public.place_notes where id = $1', [id])
+    expect(n.body).toMatch(/窗邊有插座/)
+  })
+})
+

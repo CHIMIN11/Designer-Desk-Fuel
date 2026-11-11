@@ -1266,3 +1266,9 @@ fieldset.field.skill-picker { border: 0 !important; padding: 0 !important; backg
 .quick-chips .chip { min-height: 32px; padding: 4px 12px; font-size: 12.5px; }
 .quick-chips .chip.on::before { content: ''; }
 @media (max-width: 560px) { .seg-grid { grid-template-columns: 1fr; } .seg-btn { flex: 1 1 auto; } }
+.note-card .note-label { margin: 0 0 6px; font-size: 11px; letter-spacing: .08em; color: var(--champagne); opacity: .85; }
+.note-card h3 { margin: 0 0 6px; font-size: 18px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.note-card h3 small { font-size: 12px; font-weight: 400; color: var(--muted-2); }
+.notes-section { margin-top: 56px; }
+.note-desk { display: grid; gap: 14px; }
+.note-desk .lead-s { margin: 0; color: var(--muted); line-height: 1.8; font-size: 14px; }
