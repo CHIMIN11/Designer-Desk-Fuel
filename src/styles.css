@@ -1295,3 +1295,37 @@ fieldset.field.skill-picker { border: 0 !important; padding: 0 !important; backg
 .news-text p { font-size: 16.5px; line-height: 1.95; color: #e6e1ec; margin: 0 0 1.2em; white-space: pre-wrap; }
 @media (max-width: 960px) { .news-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .news-grid { grid-template-columns: 1fr; } }
+
+/* ==========================================================================
+   DDF "Midnight Magic" color system v1 — single source of truth.
+   Ink · Moonlight · Champagne · Amethyst · Rose (see the DDF Design System).
+   ========================================================================== */
+:root {
+  /* Ink — backgrounds & surfaces */
+  --ink-950: #07060B; --ink-900: #0D0A13; --ink-850: #120E19; --ink-800: #1A1424; --ink-700: #2A2236;
+  /* Moonlight — text */
+  --moon-50: #F4F1F8; --moon-300: #C9C3D4; --moon-500: #9C95AA;
+  /* Champagne — the magic accent */
+  --gold-100: #F6E7C4; --gold-300: #E9D3A6; --gold-500: #D9BC84; --gold-700: #A98448;
+  /* Amethyst — aura & night sky */
+  --amethyst-300: #C9A7FF; --amethyst-500: #8A5BC4; --amethyst-700: #5B3A8F; --amethyst-900: #2C1A45;
+  /* Rose — primary action only */
+  --rose-300: #F2A3C4; --rose-500: #D84F8C; --rose-700: #A92A63;
+  /* Status */
+  --success: #6FD59A; --warning: #E8B45A; --danger: #F07A86; --info: #8FB8FF;
+
+  /* Semantic aliases used across the site */
+  --bg: var(--ink-950); --bg-2: var(--ink-900); --panel: var(--ink-850); --surface: var(--ink-850); --surface-2: var(--ink-800);
+  --line: var(--ink-700); --line-2: #3A3147;
+  --text: var(--moon-50); --muted: var(--moon-300); --muted-2: var(--moon-500);
+  --gold: var(--gold-500); --champagne: var(--gold-300);
+  --purple: var(--amethyst-300); --purple-deep: var(--amethyst-900);
+  --pink: var(--rose-500); --pink-deep: var(--rose-700); --hot: var(--rose-500); --hot-2: var(--rose-300);
+  --gold-grad: linear-gradient(180deg, var(--gold-100) 0%, var(--gold-500) 55%, var(--gold-700) 100%);
+  --pink-grad: linear-gradient(180deg, var(--rose-500) 0%, var(--rose-700) 100%);
+  --hot-grad: var(--pink-grad);
+  --aura: radial-gradient(60% 60% at 50% 40%, rgba(138,91,196,0.28), transparent 70%);
+}
+::selection { background: rgba(217,188,132,0.35); color: #fff; }
+a { color: var(--gold-300); }
+.notice-error { color: var(--danger); }
